@@ -1,0 +1,21 @@
+html.srd-extension-focus-panels .Root__nav-bar,
+html.srd-extension-focus-panels .Root__right-sidebar {
+  opacity: 0.46;
+  filter: saturate(0.72);
+  transition: opacity 180ms ease, filter 180ms ease !important;
+}
+
+html.srd-extension-focus-panels .Root__nav-bar:hover,
+html.srd-extension-focus-panels .Root__nav-bar:focus-within,
+html.srd-extension-focus-panels .Root__right-sidebar:hover,
+html.srd-extension-focus-panels .Root__right-sidebar:focus-within {
+  opacity: 1;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.srd-extension-focus-panels .Root__nav-bar,
+  html.srd-extension-focus-panels .Root__right-sidebar {
+    transition: none !important;
+  }
+}

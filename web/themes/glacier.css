@@ -1,0 +1,21 @@
+html.srd-theme-active[data-srd-theme="glacier"] {
+  --srd-panel: #071018;
+  --srd-panel-raised: #0d1922;
+  --srd-canvas: #040a0f;
+  --srd-border: rgba(165, 243, 252, 0.13);
+  --background-base: #040a0f !important;
+  --background-elevated-base: #0b151d !important;
+  --background-elevated-highlight: #122632 !important;
+  --background-tinted-base: rgba(56, 189, 248, 0.07) !important;
+}
+
+html.srd-theme-active[data-srd-theme="glacier"] body {
+  background:
+    radial-gradient(circle at 70% -10%, color-mix(in srgb, var(--srd-secondary) 14%, transparent), transparent 36%),
+    linear-gradient(145deg, #02070b, #071018 58%, #03070a) !important;
+}
+
+html.srd-theme-active[data-srd-theme="glacier"] .srd-left-sidebar,
+html.srd-theme-active[data-srd-theme="glacier"] .srd-player {
+  background: color-mix(in srgb, #071018 93%, var(--srd-primary)) !important;
+}

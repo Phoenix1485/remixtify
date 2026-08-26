@@ -1,0 +1,95 @@
+services:
+  website:
+    image: remixtify-site:latest
+    container_name: remixtify-site
+    build:
+      context: ./website
+      args:
+        SITE_URL: ${SITE_URL:-http://localhost:8080}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=16m
+      - /var/run:size=1m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    networks:
+      - edge
+      - backend
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: remixtify-changelog-api:latest
+    container_name: remixtify-api
+    environment:
+      DB_HOST: database
+      DB_PORT: "3306"
+      DB_NAME: remixtify
+      DB_USER: remixtify
+      DB_PASSWORD: ${MARIADB_PASSWORD:-local-only-remixtify-password}
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - backend
+
+  database:
+    image: mariadb:11.4
+    container_name: remixtify-database
+    environment:
+      MARIADB_DATABASE: remixtify
+      MARIADB_USER: remixtify
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-local-only-remixtify-password}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-local-only-root-password}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
+    volumes:
+      - remixtify_database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
+volumes:
+  remixtify_database:
+
+networks:
+  edge:
+  backend:
+    internal: true

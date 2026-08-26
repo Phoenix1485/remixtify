@@ -1,0 +1,22 @@
+html.srd-theme-active[data-srd-theme="ultraviolet"] {
+  --srd-panel: #100713;
+  --srd-panel-raised: #1a0c21;
+  --srd-canvas: #08040b;
+  --srd-border: rgba(216, 180, 254, 0.13);
+  --background-base: #08040b !important;
+  --background-elevated-base: #170a1c !important;
+  --background-elevated-highlight: #26102f !important;
+  --background-tinted-base: rgba(192, 38, 211, 0.075) !important;
+}
+
+html.srd-theme-active[data-srd-theme="ultraviolet"] body {
+  background:
+    radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--srd-primary) 17%, transparent), transparent 34%),
+    radial-gradient(circle at 94% 92%, color-mix(in srgb, var(--srd-secondary) 12%, transparent), transparent 38%),
+    #050207 !important;
+}
+
+html.srd-theme-active[data-srd-theme="ultraviolet"] .srd-main-view,
+html.srd-theme-active[data-srd-theme="ultraviolet"] .srd-global-nav {
+  background: #08040b !important;
+}

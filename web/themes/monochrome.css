@@ -1,0 +1,19 @@
+html.srd-theme-active[data-srd-theme="monochrome"] {
+  --srd-panel: #0a0a0b;
+  --srd-panel-raised: #141416;
+  --srd-canvas: #060607;
+  --srd-border: rgba(255, 255, 255, 0.11);
+  --background-base: #060607 !important;
+  --background-elevated-base: #121214 !important;
+  --background-elevated-highlight: #202023 !important;
+  --background-tinted-base: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.srd-theme-active[data-srd-theme="monochrome"] body {
+  background: linear-gradient(145deg, #030304, #0a0a0b 55%, #050506) !important;
+}
+
+html.srd-theme-active[data-srd-theme="monochrome"] .srd-player,
+html.srd-theme-active[data-srd-theme="monochrome"] .srd-global-nav {
+  filter: saturate(0) !important;
+}

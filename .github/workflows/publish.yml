@@ -1,0 +1,74 @@
+name: Build, release, and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: remixify-publish
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      page-artifact: github-pages
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - run: npm ci
+      - run: npm run build:release
+      - run: npm run check
+
+      - name: Build Windows CLI
+        shell: bash
+        run: |
+          mkdir -p build/release
+          SHORT_SHA="${GITHUB_SHA::12}"
+          GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -X main.version=${SHORT_SHA}" -o build/release/remixify-windows-amd64.exe ./cmd/remixify
+
+      - name: Add CLI update metadata to channel
+        run: node scripts/finalize-channel.mjs build/release/remixify-windows-amd64.exe
+
+      - name: Replace continuous release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release delete continuous --cleanup-tag --yes || true
+          gh release create continuous build/release/remixify-windows-amd64.exe \
+            --target "$GITHUB_SHA" \
+            --title "Continuous build ${GITHUB_SHA::12}" \
+            --notes "Automatically built from the latest main-branch push."
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+
+  deploy-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy update channel
+        id: deployment
+        uses: actions/deploy-pages@v4

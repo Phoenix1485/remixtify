@@ -1,0 +1,21 @@
+html.srd-theme-active[data-srd-theme="moss"] {
+  --srd-panel: #08100b;
+  --srd-panel-raised: #0f1b13;
+  --srd-canvas: #040906;
+  --srd-border: rgba(163, 230, 53, 0.12);
+  --background-base: #040906 !important;
+  --background-elevated-base: #0d1710 !important;
+  --background-elevated-highlight: #16261a !important;
+  --background-tinted-base: rgba(132, 204, 22, 0.065) !important;
+}
+
+html.srd-theme-active[data-srd-theme="moss"] body {
+  background:
+    radial-gradient(circle at 8% 16%, color-mix(in srgb, var(--srd-primary) 12%, transparent), transparent 34%),
+    radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--srd-secondary) 9%, transparent), transparent 34%),
+    #030704 !important;
+}
+
+html.srd-theme-active[data-srd-theme="moss"] .srd-left-sidebar {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--srd-primary) 12%, transparent), transparent 38%), #08100b !important;
+}

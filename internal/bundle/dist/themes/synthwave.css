@@ -1,0 +1,21 @@
+html.srd-theme-active[data-srd-theme="synthwave"] {
+  --srd-panel: #0c0918;
+  --srd-panel-raised: #15102a;
+  --srd-canvas: #060510;
+  --srd-border: rgba(244, 114, 182, 0.14);
+  --background-base: #060510 !important;
+  --background-elevated-base: #120e25 !important;
+  --background-elevated-highlight: #20183a !important;
+  --background-tinted-base: rgba(244, 114, 182, 0.07) !important;
+}
+
+html.srd-theme-active[data-srd-theme="synthwave"] body {
+  background:
+    radial-gradient(circle at 18% -8%, color-mix(in srgb, var(--srd-primary) 16%, transparent), transparent 35%),
+    radial-gradient(circle at 88% 108%, color-mix(in srgb, var(--srd-secondary) 13%, transparent), transparent 38%),
+    #04030b !important;
+}
+
+html.srd-theme-active[data-srd-theme="synthwave"] .srd-player {
+  background: linear-gradient(95deg, color-mix(in srgb, var(--srd-primary) 12%, #0c0918), color-mix(in srgb, var(--srd-secondary) 7%, #0c0918)) !important;
+}

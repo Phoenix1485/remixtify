@@ -1,0 +1,20 @@
+html.srd-theme-active[data-srd-theme="ember"] {
+  --srd-panel: #130b08;
+  --srd-panel-raised: #20130e;
+  --srd-canvas: #0a0604;
+  --srd-border: rgba(251, 146, 60, 0.14);
+  --background-base: #0a0604 !important;
+  --background-elevated-base: #1b100c !important;
+  --background-elevated-highlight: #2c1910 !important;
+  --background-tinted-base: rgba(245, 158, 11, 0.07) !important;
+}
+
+html.srd-theme-active[data-srd-theme="ember"] body {
+  background:
+    radial-gradient(circle at 52% -15%, color-mix(in srgb, var(--srd-primary) 15%, transparent), transparent 38%),
+    linear-gradient(150deg, #080403, #120906 62%, #070403) !important;
+}
+
+html.srd-theme-active[data-srd-theme="ember"] .srd-player {
+  background: linear-gradient(95deg, color-mix(in srgb, var(--srd-secondary) 14%, #130b08), #130b08 46%) !important;
+}

@@ -1,0 +1,84 @@
+{
+  "themes": [
+    {
+      "id": "nocturne",
+      "name": "Nocturne",
+      "description": "Near-black glass with restrained color glow.",
+      "entry": "themes/nocturne.css",
+      "primaryColor": "#7c3aed",
+      "secondaryColor": "#14b8a6"
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon",
+      "description": "Graphite panels with warm amber details.",
+      "entry": "themes/carbon.css",
+      "primaryColor": "#f59e0b",
+      "secondaryColor": "#f97316"
+    },
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "description": "Deep navy surfaces with cyan-violet light.",
+      "entry": "themes/aurora.css",
+      "primaryColor": "#22d3ee",
+      "secondaryColor": "#8b5cf6"
+    },
+    {
+      "id": "crimson",
+      "name": "Crimson",
+      "description": "Ink-black panels with a focused red pulse.",
+      "entry": "themes/crimson.css",
+      "primaryColor": "#ef4444",
+      "secondaryColor": "#f43f5e"
+    },
+    {
+      "id": "glacier",
+      "name": "Glacier",
+      "description": "Cold slate surfaces with arctic blue light.",
+      "entry": "themes/glacier.css",
+      "primaryColor": "#38bdf8",
+      "secondaryColor": "#a5f3fc"
+    },
+    {
+      "id": "ultraviolet",
+      "name": "Ultraviolet",
+      "description": "Black-violet panels with electric magenta depth.",
+      "entry": "themes/ultraviolet.css",
+      "primaryColor": "#c026d3",
+      "secondaryColor": "#8b5cf6"
+    },
+    {
+      "id": "ember",
+      "name": "Ember",
+      "description": "Smoked brown-black with warm coral and amber.",
+      "entry": "themes/ember.css",
+      "primaryColor": "#fb7185",
+      "secondaryColor": "#f59e0b"
+    },
+    {
+      "id": "moss",
+      "name": "Moss",
+      "description": "Forest-black surfaces with botanical neon accents.",
+      "entry": "themes/moss.css",
+      "primaryColor": "#84cc16",
+      "secondaryColor": "#2dd4bf"
+    },
+    {
+      "id": "monochrome",
+      "name": "Monochrome",
+      "description": "Neutral graphite, silver controls and zero color noise.",
+      "entry": "themes/monochrome.css",
+      "primaryColor": "#e5e7eb",
+      "secondaryColor": "#71717a"
+    },
+    {
+      "id": "synthwave",
+      "name": "Synthwave",
+      "description": "Midnight indigo with pink and cyan signal light.",
+      "entry": "themes/synthwave.css",
+      "primaryColor": "#f472b6",
+      "secondaryColor": "#22d3ee"
+    }
+  ]
+}

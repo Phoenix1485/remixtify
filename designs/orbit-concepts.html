@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbit — Neues Musik-App-Konzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#ff6b57;
+    --accent2:#ffb84d;
+    --bg1:#0c0b10;
+    --panel-alpha:0.9;
+    --card-alpha:1;
+    --blur:0px;
+    --text:#f3f1ee;
+    --sub:rgba(243,241,238,.55);
+    --card:#17151c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Manrope', sans-serif;
+    color:var(--text);
+    background:var(--bg1);
+    overflow:hidden;
+  }
+  button{ font-family:inherit; }
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.14); border-radius:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  .disp{ font-family:'Unbounded', sans-serif; }
+
+  /* ============ DEMO SWITCHER (nicht Teil des Designs) ============ */
+  .switcher{
+    height:44px; background:#050506; display:flex; align-items:center; gap:6px;
+    padding:0 12px; border-bottom:1px solid #161616; overflow-x:auto; white-space:nowrap;
+  }
+  .switcher::-webkit-scrollbar{ display:none; }
+  .switcher span.lbl{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#666; font-weight:700; margin-right:6px; flex:0 0 auto; }
+  .tab{ flex:0 0 auto; padding:6px 13px; border-radius:999px; font-size:11.5px; font-weight:700; border:1px solid #262626; background:#0e0e0e; color:#999; cursor:pointer; transition:all .2s; }
+  .tab:hover{ color:#fff; border-color:#444; }
+  .tab.active{ background:var(--accent); color:#0a0a0d; border-color:var(--accent); }
+
+  /* ============ STAGE ============ */
+  .stage{ position:relative; height:calc(100vh - 44px); overflow:hidden; }
+  canvas#fx{ position:absolute; inset:0; z-index:0; }
+  .fx-tint{ position:absolute; inset:0; z-index:0; transition:background 1s ease; }
+
+  .glasspanel{
+    background:rgba(10,9,13,var(--panel-alpha));
+    backdrop-filter:blur(var(--blur)) saturate(140%);
+    -webkit-backdrop-filter:blur(var(--blur)) saturate(140%);
+    border:1px solid rgba(255,255,255,.09);
+  }
+
+  /* ---- floating top nav capsule ---- */
+  .topnav{
+    position:absolute; top:26px; left:50%; transform:translateX(-50%);
+    z-index:30; display:flex; align-items:center; gap:26px;
+    padding:11px 12px 11px 22px; border-radius:999px;
+  }
+  .topnav .mark{ width:20px; height:20px; border-radius:7px; background:conic-gradient(from 90deg, var(--accent), var(--accent2), var(--accent)); }
+  .topnav nav{ display:flex; gap:22px; }
+  .topnav a{ font-size:12.5px; font-weight:700; color:var(--sub); cursor:pointer; transition:color .2s; }
+  .topnav a.active{ color:var(--text); }
+  .topnav .searchbtn{
+    width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.07);
+    display:flex; align-items:center; justify-content:center; color:var(--sub); cursor:pointer; border:none;
+  }
+
+  /* ---- floating left dock ---- */
+  .dock{
+    position:absolute; left:24px; top:50%; transform:translateY(-50%);
+    z-index:30; display:flex; flex-direction:column; gap:10px;
+    padding:12px 8px; border-radius:26px;
+  }
+  .dockbtn{
+    width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:var(--sub); background:transparent; border:none; cursor:pointer; transition:all .2s;
+  }
+  .dockbtn:hover{ color:#fff; }
+  .dockbtn.active{ background:var(--accent); color:#0a0a0d; }
+
+  /* ---- right queue stack ---- */
+  .queue{
+    position:absolute; right:24px; top:96px; bottom:118px; width:224px; z-index:20;
+    overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px;
+  }
+  .queue-head{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; color:var(--sub); margin-bottom:2px; padding-left:4px;}
+  .qcard{
+    border-radius:18px; padding:10px; display:flex; gap:10px; align-items:center; cursor:pointer;
+    transition:transform .2s;
+  }
+  .qcard:hover{ transform:translateX(-4px); }
+  .qcard .th{ width:38px; height:38px; border-radius:12px; flex:0 0 auto; background:linear-gradient(150deg, hsl(var(--h1),60%,52%), hsl(var(--h2),55%,30%)); }
+  .qcard .tt{ font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .qcard .ta{ font-size:10.5px; color:var(--sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* ---- main scroll area ---- */
+  .main{ position:relative; z-index:10; height:100%; overflow-y:auto; padding:118px 280px 170px 150px; }
+
+  /* ---- hero orb ---- */
+  .hero{ text-align:center; margin-bottom:74px; }
+  .hero .eyebrow{ font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--sub); font-weight:800; margin-bottom:22px; }
+  .orb-wrap{ position:relative; width:196px; height:196px; margin:0 auto 26px; }
+  .orb-ring{ position:absolute; inset:-12px; }
+  .orb-disc{
+    position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
+    animation:spin 14s linear infinite;
+  }
+  .orb-disc::after{ content:''; position:absolute; inset:16px; border-radius:50%; background:var(--bg1); }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .orb-play{
+    position:absolute; inset:0; margin:auto; width:54px; height:54px; border-radius:50%;
+    background:#fff; color:#111; border:none; cursor:pointer; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero h1{ font-size:clamp(30px,4.6vw,50px); font-weight:700; letter-spacing:-.01em; }
+  .hero .artist{ color:var(--sub); font-size:13.5px; margin-top:8px; font-weight:600; }
+
+  .moods{ display:flex; gap:9px; justify-content:center; margin-top:28px; flex-wrap:wrap; }
+  .mood{ padding:8px 18px; border-radius:999px; font-size:12px; font-weight:700; background:var(--card); border:1px solid rgba(255,255,255,.08); color:var(--sub); cursor:pointer; transition:all .18s; }
+  .mood.on{ background:var(--accent); color:#0a0a0d; border-color:transparent; }
+  .mood:hover{ color:#fff; }
+
+  /* ---- bento grid ---- */
+  .section-eyebrow{ font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--sub); font-weight:800; margin-bottom:12px; }
+  .bento{ display:grid; grid-template-columns:repeat(6,1fr); grid-auto-rows:108px; gap:14px; margin-bottom:66px; }
+  .bcard{
+    border-radius:26px; position:relative; overflow:hidden; cursor:pointer;
+    display:flex; align-items:flex-end; padding:20px;
+    background:linear-gradient(160deg, hsl(var(--h1),62%,46%), hsl(var(--h2),56%,24%));
+    transition:transform .3s ease;
+  }
+  .bcard::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.16), transparent 55%);
+  }
+  .bcard:hover{ transform:translateY(-6px); }
+  .bcard .btitle{ font-weight:600; font-size:14.5px; line-height:1.25; position:relative; z-index:2; }
+  .bcard .bplay{
+    position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%;
+    background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; opacity:0;
+    transition:opacity .2s; z-index:2;
+  }
+  .bcard:hover .bplay{ opacity:1; }
+  .b1{ grid-column:span 3; grid-row:span 2; }
+  .b2{ grid-column:span 3; grid-row:span 1; }
+  .b3{ grid-column:span 2; grid-row:span 1; }
+  .b4{ grid-column:span 2; grid-row:span 1; }
+  .b5{ grid-column:span 2; grid-row:span 2; }
+  .b6{ grid-column:span 4; grid-row:span 1; }
+  .b1 .btitle, .b5 .btitle{ font-size:22px; }
+
+  /* ---- bubble shelf ---- */
+  .shelf-title{ font-size:18px; font-weight:600; margin-bottom:18px; }
+  .bubbles{ display:flex; gap:22px; overflow-x:auto; padding-bottom:10px; }
+  .bubble{ flex:0 0 auto; width:92px; text-align:center; cursor:pointer; }
+  .bubble .circ{
+    width:84px; height:84px; border-radius:50%; margin:0 auto 10px;
+    background:linear-gradient(155deg, hsl(var(--h1),66%,56%), hsl(var(--h2),56%,32%));
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:19px; color:#fff;
+    transition:transform .2s;
+  }
+  .bubble:hover .circ{ transform:scale(1.07); }
+  .bubble .bname{ font-size:11px; font-weight:700; color:var(--sub); }
+
+  /* ---- player island ---- */
+  .island{
+    position:absolute; left:50%; bottom:22px; transform:translateX(-50%);
+    z-index:40; display:flex; align-items:center; gap:14px;
+    padding:8px 20px 8px 8px; border-radius:999px;
+    box-shadow:0 16px 40px rgba(0,0,0,.5);
+  }
+  .island .ith{ width:44px; height:44px; border-radius:50%; flex:0 0 auto; background:conic-gradient(from 0deg,var(--accent),var(--accent2)); }
+  .island .imeta{ min-width:0; max-width:140px; }
+  .island .itt{ font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .island .ita{ font-size:10.5px; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .island .ictrl{ display:flex; align-items:center; gap:10px; }
+  .island button{ background:none; border:none; color:var(--sub); cursor:pointer; display:flex; }
+  .island button:hover{ color:#fff; }
+  .iplay-wrap{ position:relative; width:38px; height:38px; }
+  .iplay-wrap svg.ring{ position:absolute; inset:0; transform:rotate(-90deg); }
+  .iplay{
+    position:absolute; inset:5px; border-radius:50%; background:#fff; color:#111;
+    display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;
+  }
+  .ieq{ display:flex; align-items:flex-end; gap:2px; height:11px; }
+  .ieq i{ width:2.5px; background:var(--accent); border-radius:1px; animation:eqbar 1s ease-in-out infinite; }
+  .ieq i:nth-child(1){ height:40%; } .ieq i:nth-child(2){ height:100%; animation-delay:.2s; } .ieq i:nth-child(3){ height:65%; animation-delay:.4s; }
+  @keyframes eqbar{ 0%,100%{ height:20%; } 50%{ height:100%; } }
+  .ieq.paused i{ animation-play-state:paused; }
+
+  .caption{
+    position:fixed; left:16px; bottom:16px; z-index:60; max-width:320px;
+    padding:12px 14px; border-radius:14px; background:rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.12);
+    font-size:11.5px; line-height:1.5; color:#ddd; backdrop-filter:blur(10px);
+  }
+  .caption b{ display:block; font-size:12.5px; color:#fff; margin-bottom:3px; }
+</style>
+</head>
+<body>
+
+<div class="switcher" id="switcher"><span class="lbl">Konzept:</span></div>
+
+<div class="stage">
+  <canvas id="fx"></canvas>
+  <div class="fx-tint" id="fxTint"></div>
+
+  <div class="topnav glasspanel">
+    <div class="mark"></div>
+    <nav>
+      <a class="active">Für dich</a>
+      <a>Entdecken</a>
+      <a>Bibliothek</a>
+    </nav>
+    <button class="searchbtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+  </div>
+
+  <div class="dock glasspanel">
+    <button class="dockbtn active" title="Home"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg></button>
+    <button class="dockbtn" title="Suche"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+    <button class="dockbtn" title="Bibliothek"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="7" height="16" rx="2"/><rect x="14" y="4" width="7" height="16" rx="2"/></svg></button>
+    <button class="dockbtn" title="Favoriten"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c1.9 0 3.4 1 4 2.3.6-1.3 2.1-2.3 4-2.3 3.5 0 6 3.5 4 7.5C19 16.65 12 21 12 21z"/></svg></button>
+  </div>
+
+  <div class="queue" id="queue">
+    <div class="queue-head">Als Nächstes</div>
+  </div>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow" id="heroEyebrow">Jetzt läuft</div>
+      <div class="orb-wrap">
+        <svg class="orb-ring" viewBox="0 0 220 220">
+          <circle cx="110" cy="110" r="104" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="3"/>
+          <circle id="heroRing" cx="110" cy="110" r="104" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 110 110)"/>
+        </svg>
+        <div class="orb-disc"></div>
+        <button class="orb-play" id="playBtn">
+          <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+      </div>
+      <h1 class="disp" id="heroTitle">Nightfall Echoes</h1>
+      <div class="artist" id="heroArtist">Aurora Collective</div>
+      <div class="moods" id="moods"></div>
+    </section>
+
+    <section>
+      <div class="section-eyebrow">Kuratiert für dieses Konzept</div>
+      <div class="bento" id="bento"></div>
+    </section>
+
+    <section>
+      <div class="shelf-title disp">Sound-Welten</div>
+      <div class="bubbles" id="bubbles"></div>
+    </section>
+  </main>
+
+  <div class="island glasspanel">
+    <div class="ith"></div>
+    <div class="imeta">
+      <div class="itt">Nightfall Echoes</div>
+      <div class="ita">Aurora Collective</div>
+    </div>
+    <div class="ictrl">
+      <button title="prev"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM20 6L9 12l11 6z"/></svg></button>
+      <div class="iplay-wrap">
+        <svg class="ring" viewBox="0 0 38 38">
+          <circle cx="19" cy="19" r="16" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="2.4"/>
+          <circle id="islandRing" cx="19" cy="19" r="16" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        <button class="iplay" id="islandPlayBtn"><svg id="islandPlayIcon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+      </div>
+      <button title="next"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM4 6l11 6-11 6z"/></svg></button>
+      <div class="ieq" id="ieq"><i></i><i></i><i></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="caption" id="caption">
+  <b>01 · Fluid Minimal</b>
+  Komplett neues UI — orbit-zentrierter Player, floatende Docks, editoriales Bento-Grid statt Listen.
+</div>
+
+<script>
+/* ============================================================
+   KONZEPTE
+============================================================ */
+const CONCEPTS = [
+  { title:'Fluid Minimal', badge:'01 · Fluid Minimal',
+    desc:'Komplett neues UI — orbit-zentrierter Player, floatende Docks, editoriales Bento-Grid statt Listen.',
+    accent:'#ff6b57', accent2:'#ffb84d', bg:'#0c0b10', tint:['#0c0b10','#0c0b10'],
+    glass:0.9, blur:0, fx:'gradientDrift' },
+  { title:'Glass Aurora', badge:'02 · Glass Aurora',
+    desc:'Alle Docks & Panels werden zu Frosted Glass, darunter wabern live Aurora-Bänder.',
+    accent:'#7ef2c0', accent2:'#a78bfa', bg:'#03060c', tint:['#03060c','#03060c'],
+    glass:0.32, blur:22, fx:'aurora' },
+  { title:'Midnight Snowfall', badge:'03 · Midnight Snowfall',
+    desc:'Echter Partikel-Schneefall mit Tiefen-Parallax, kühle Glass-Docks in Blau-Weiß.',
+    accent:'#dfeeff', accent2:'#5f8fc9', bg:'#020305', tint:['#020305','#05070c'],
+    glass:0.3, blur:22, fx:'snow' },
+  { title:'Shooting Star Nights', badge:'04 · Shooting Stars',
+    desc:'Twinkelnde Sterne plus animierte Sternschnuppen, die über den Screen schießen.',
+    accent:'#ffe08a', accent2:'#8ab4ff', bg:'#020208', tint:['#020208','#04030f'],
+    glass:0.3, blur:22, fx:'stars' },
+  { title:'Liquid Chrome', badge:'05 · Liquid Chrome',
+    desc:'Fließende, verschmelzende Metaball-Blobs hinter verspiegeltem Glas.',
+    accent:'#d9dee5', accent2:'#7c93b8', bg:'#08090c', tint:['#08090c','#0e1015'],
+    glass:0.28, blur:26, fx:'chrome' },
+  { title:'Neon Cyber Nights', badge:'06 · Neon Cyber',
+    desc:'Animierter Neon-Regen vor glühender Skyline-Basis, Docks aus Rauchglas.',
+    accent:'#ff4fd8', accent2:'#33e6ff', bg:'#050208', tint:['#050208','#08030f'],
+    glass:0.3, blur:20, fx:'cyber' },
+  { title:'Botanical Bloom', badge:'07 · Botanical Bloom',
+    desc:'Rotierende, treibende Blätter im simulierten Wind — organisches Glas in Grün.',
+    accent:'#9fe08a', accent2:'#d9c07a', bg:'#060a06', tint:['#060a06','#080d09'],
+    glass:0.32, blur:20, fx:'botanical' },
+  { title:'Cosmic Nebula', badge:'08 · Cosmic Nebula',
+    desc:'Pulsierende, driftende Nebelwolken mit funkelndem Sternstaub-Overlay.',
+    accent:'#ff8ac2', accent2:'#7a6bff', bg:'#030209', tint:['#030209','#06030f'],
+    glass:0.28, blur:24, fx:'nebula' },
+  { title:'Rainy Window Lo-Fi', badge:'09 · Rainy Window',
+    desc:'Animiert ablaufende Regentropfen vor warmem Stadt-Bokeh, gedämpftes Glas.',
+    accent:'#ffb37a', accent2:'#7a93b0', bg:'#050608', tint:['#050608','#070a0f'],
+    glass:0.34, blur:18, fx:'rainywindow' },
+  { title:'Aurora Borealis Live', badge:'10 · Aurora Live',
+    desc:'Wie Glass Aurora, aber der Blur „atmet" im simulierten BPM-Takt.',
+    accent:'#6dffb0', accent2:'#6da8ff', bg:'#020508', tint:['#020508','#03060a'],
+    glass:0.3, blur:22, fx:'aurora-breathing' },
+  { title:'Sunset Drift', badge:'11 · Sunset Drift',
+    desc:'Animierter Sonnenuntergang mit driftenden Wolkenschatten und goldenem Glow.',
+    accent:'#ffb26b', accent2:'#ff6b9d', bg:'#0f0810', tint:['#0f0810','#100a14'],
+    glass:0.3, blur:20, fx:'sunset' },
+];
+
+const BENTO = [
+  {cls:'b1', n:'Late Night Drift', h1:12,  h2:340},
+  {cls:'b2', n:'Neon Bässe',       h1:200, h2:250},
+  {cls:'b3', n:'Focus Flow',       h1:150, h2:170},
+  {cls:'b4', n:'Rooftop Sunset',   h1:20,  h2:40},
+  {cls:'b5', n:'Deep Textures',    h1:260, h2:300},
+  {cls:'b6', n:'Morning Static',   h1:90,  h2:70},
+];
+const BUBBLES = [
+  {n:'Ambient', h1:200, h2:250}, {n:'Hardtekk', h1:10, h2:30},
+  {n:'Lo-Fi', h1:30, h2:50}, {n:'Techno', h1:270, h2:300},
+  {n:'Dream Pop', h1:320, h2:340}, {n:'Chillwave', h1:150, h2:180},
+];
+const QUEUE = [
+  {t:'Glass Horizon', a:'Nova Delphine', h1:210, h2:250},
+  {t:'Afterglow', a:'Rue & Vale', h1:20, h2:340},
+  {t:'Static Bloom', a:'Kilo Fresh', h1:150, h2:170},
+  {t:'Halcyon Drift', a:'Moonside', h1:270, h2:300},
+];
+const MOODS = ['Fokus','Energie','Chill','Late Night','Warm-up'];
+
+document.getElementById('bento').innerHTML = BENTO.map(b=>`
+  <div class="bcard ${b.cls}" style="--h1:${b.h1};--h2:${b.h2};">
+    <div class="btitle disp">${b.n}</div>
+    <div class="bplay"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+  </div>
+`).join('');
+
+document.getElementById('bubbles').innerHTML = BUBBLES.map(b=>`
+  <div class="bubble">
+    <div class="circ" style="--h1:${b.h1};--h2:${b.h2};">${b.n[0]}</div>
+    <div class="bname">${b.n}</div>
+  </div>
+`).join('');
+
+const queueEl = document.getElementById('queue');
+queueEl.innerHTML += QUEUE.map(q=>`
+  <div class="qcard glasspanel">
+    <div class="th" style="--h1:${q.h1};--h2:${q.h2};"></div>
+    <div>
+      <div class="tt">${q.t}</div>
+      <div class="ta">${q.a}</div>
+    </div>
+  </div>
+`).join('');
+
+document.getElementById('moods').innerHTML = MOODS.map((m,i)=>`<div class="mood${i===0?' on':''}">${m}</div>`).join('');
+document.querySelectorAll('.mood').forEach(m=>{
+  m.addEventListener('click', ()=>{
+    document.querySelectorAll('.mood').forEach(x=>x.classList.remove('on'));
+    m.classList.add('on');
+  });
+});
+
+/* ============================================================
+   SWITCHER
+============================================================ */
+const switcherEl = document.getElementById('switcher');
+CONCEPTS.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.className='tab'+(i===0?' active':'');
+  b.textContent=c.title;
+  b.onclick=()=>selectConcept(i);
+  switcherEl.appendChild(b);
+});
+
+const root=document.documentElement;
+const fxTint=document.getElementById('fxTint');
+const caption=document.getElementById('caption');
+let current=0;
+
+function selectConcept(i){
+  current=i;
+  const c=CONCEPTS[i];
+  [...switcherEl.querySelectorAll('.tab')].forEach((t,idx)=>t.classList.toggle('active', idx===i));
+  root.style.setProperty('--accent', c.accent);
+  root.style.setProperty('--accent2', c.accent2);
+  root.style.setProperty('--bg1', c.bg);
+  root.style.setProperty('--panel-alpha', c.glass);
+  root.style.setProperty('--blur', c.blur+'px');
+  fxTint.style.background = `linear-gradient(160deg, ${c.tint[0]}, ${c.tint[1]})`;
+  caption.innerHTML = `<b>${c.badge}</b>${c.desc}`;
+  setFx(c.fx);
+}
+
+/* ============================================================
+   CANVAS FX ENGINE
+============================================================ */
+const canvas=document.getElementById('fx');
+const ctx=canvas.getContext('2d');
+let W,H,DPR;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=canvas.clientWidth=canvas.parentElement.clientWidth;
+  H=canvas.clientHeight=canvas.parentElement.clientHeight;
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', resize);
+
+let particles=[]; let fxType='gradientDrift'; let t0=performance.now(); let shootTimer=0; let breathPhase=0;
+function rand(a,b){ return a+Math.random()*(b-a); }
+function getVar(name){ return getComputedStyle(root).getPropertyValue(name).trim()||'#ffffff'; }
+function hexA(hex,a){
+  hex=hex.replace('#','');
+  if(hex.length===3) hex=hex.split('').map(ch=>ch+ch).join('');
+  const r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function setFx(type){
+  fxType=type; particles=[];
+  const n={snow:150, stars:170, chrome:6, cyber:100, botanical:28, nebula:5, rainywindow:120, sunset:5}[type]||0;
+  for(let i=0;i<n;i++){
+    if(type==='snow') particles.push({x:rand(0,W), y:rand(0,H), r:rand(1,3.4), spd:rand(.3,1.3), drift:rand(-.3,.3)});
+    else if(type==='stars') particles.push({x:rand(0,W), y:rand(0,H*.9), r:rand(.4,1.6), tw:rand(0,6.28), spd:rand(.01,.03)});
+    else if(type==='chrome') particles.push({x:rand(0,W), y:rand(0,H), r:rand(110,220), vx:rand(-.15,.15), vy:rand(-.1,.1), hue:rand(200,230)});
+    else if(type==='cyber') particles.push({x:rand(0,W), y:rand(-H,0), len:rand(18,50), spd:rand(6,14)});
+    else if(type==='botanical') particles.push({x:rand(0,W), y:rand(-H,H), r:rand(6,12), vy:rand(.2,.6), vx:rand(-.2,.2), rot:rand(0,6.28), rotSpd:rand(-.01,.01)});
+    else if(type==='nebula') particles.push({x:rand(0,W), y:rand(0,H), r:rand(160,300), vx:rand(-.05,.05), vy:rand(-.03,.03), hue:rand(0,360)});
+    else if(type==='rainywindow') particles.push({x:rand(0,W), y:rand(-H,0), len:rand(12,30), spd:rand(4,9)});
+    else if(type==='sunset') particles.push({x:rand(-100,W+100), y:rand(H*.15,H*.55), r:rand(50,120), vx:rand(.05,.15)});
+  }
+}
+
+function draw(now){
+  const dt=now-t0; t0=now;
+  if(W && H){
+    ctx.clearRect(0,0,W,H);
+
+    if(fxType==='gradientDrift'){
+      const g=ctx.createRadialGradient(W*.5+Math.sin(now/4000)*100, H*.4, 40, W*.5, H*.5, W*.75);
+      g.addColorStop(0, hexA(getVar('--accent'), .1));
+      g.addColorStop(.5, hexA(getVar('--accent2'), .05));
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
+    else if(fxType==='aurora'||fxType==='aurora-breathing'){
+      let pulse=1;
+      if(fxType==='aurora-breathing'){ breathPhase+=dt/1000; pulse=1+Math.sin(breathPhase*1.15)*0.4; }
+      for(let b=0;b<4;b++){
+        ctx.beginPath();
+        const yBase=H*(0.15+b*0.18);
+        ctx.moveTo(0,yBase);
+        for(let x=0;x<=W;x+=18){
+          const y=yBase+Math.sin(x*0.006+now/1700+b*1.4)*54*pulse;
+          ctx.lineTo(x,y);
+        }
+        ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+        const g=ctx.createLinearGradient(0,yBase-70,0,H);
+        const c1=b%2===0?getVar('--accent'):getVar('--accent2');
+        g.addColorStop(0, hexA(c1,.26*pulse));
+        g.addColorStop(1,'transparent');
+        ctx.fillStyle=g; ctx.fill();
+      }
+    }
+    else if(fxType==='snow'){
+      ctx.fillStyle='rgba(255,255,255,.9)';
+      particles.forEach(p=>{
+        p.y+=p.spd; p.x+=p.drift;
+        if(p.y>H){ p.y=-4; p.x=rand(0,W); }
+        ctx.globalAlpha=rand(.5,1);
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+      });
+      ctx.globalAlpha=1;
+    }
+    else if(fxType==='stars'){
+      particles.forEach(p=>{
+        p.tw+=p.spd;
+        const a=.4+Math.sin(p.tw)*.4+.2;
+        ctx.fillStyle=`rgba(255,255,255,${a})`;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+      });
+      shootTimer-=dt;
+      if(shootTimer<=0){
+        shootTimer=rand(1600,4000);
+        particles.push({shoot:true, x:rand(0,W*.6), y:rand(0,H*.3), vx:rand(6,10), vy:rand(3,5), life:1});
+      }
+      particles.forEach(p=>{
+        if(p.shoot){
+          ctx.strokeStyle=`rgba(255,240,200,${p.life})`;
+          ctx.lineWidth=2;
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x-p.vx*8,p.y-p.vy*8); ctx.stroke();
+          p.x+=p.vx*4; p.y+=p.vy*4; p.life-=0.02;
+        }
+      });
+      particles=particles.filter(p=>!p.shoot||p.life>0);
+    }
+    else if(fxType==='chrome'){
+      ctx.filter='blur(38px)';
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<-200)p.x=W+200; if(p.x>W+200)p.x=-200;
+        if(p.y<-200)p.y=H+200; if(p.y>H+200)p.y=-200;
+        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+        g.addColorStop(0, `hsla(${p.hue},60%,75%,.5)`);
+        g.addColorStop(1,'transparent');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+      });
+      ctx.filter='none';
+    }
+    else if(fxType==='cyber'){
+      const g=ctx.createLinearGradient(0,H*.55,0,H);
+      g.addColorStop(0,'rgba(255,60,220,.05)');
+      g.addColorStop(1,'rgba(50,220,255,.09)');
+      ctx.fillStyle=g; ctx.fillRect(0,H*.55,W,H*.45);
+      ctx.strokeStyle='rgba(160,230,255,.5)';
+      ctx.lineWidth=1.3;
+      particles.forEach(p=>{
+        p.y+=p.spd;
+        if(p.y>H){ p.y=rand(-200,-10); p.x=rand(0,W); }
+        ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x-2,p.y+p.len); ctx.stroke();
+      });
+    }
+    else if(fxType==='botanical'){
+      particles.forEach(p=>{
+        p.y+=p.vy; p.x+=p.vx+Math.sin(now/1500+p.y*.01)*.3; p.rot+=p.rotSpd;
+        if(p.y>H+20){ p.y=-20; p.x=rand(0,W); }
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+        ctx.fillStyle='rgba(160,220,140,.32)';
+        ctx.beginPath(); ctx.ellipse(0,0,p.r,p.r*.45,0,0,7); ctx.fill();
+        ctx.restore();
+      });
+    }
+    else if(fxType==='nebula'){
+      ctx.filter='blur(65px)';
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+        g.addColorStop(0, `hsla(${p.hue},80%,60%,.2)`);
+        g.addColorStop(1,'transparent');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+      });
+      ctx.filter='none';
+      for(let i=0;i<30;i++){
+        ctx.fillStyle=`rgba(255,255,255,${Math.random()*.5})`;
+        ctx.fillRect(Math.random()*W, Math.random()*H, 1.1,1.1);
+      }
+    }
+    else if(fxType==='rainywindow'){
+      const g=ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,'rgba(255,150,90,.025)');
+      g.addColorStop(1,'rgba(255,150,90,.07)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle='rgba(200,220,255,.32)';
+      ctx.lineWidth=1.1;
+      particles.forEach(p=>{
+        p.y+=p.spd;
+        if(p.y>H){ p.y=rand(-100,-10); p.x=rand(0,W); }
+        ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+1,p.y+p.len); ctx.stroke();
+      });
+    }
+    else if(fxType==='sunset'){
+      const g=ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0, hexA(getVar('--accent2'),.16));
+      g.addColorStop(.55, hexA(getVar('--accent'),.1));
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.filter='blur(28px)';
+      particles.forEach(p=>{
+        p.x+=p.vx;
+        if(p.x>W+150) p.x=-150;
+        ctx.fillStyle='rgba(255,255,255,.05)';
+        ctx.beginPath(); ctx.ellipse(p.x,p.y,p.r,p.r*.35,0,0,7); ctx.fill();
+      });
+      ctx.filter='none';
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+/* ============================================================
+   PLAYER LOGIC
+============================================================ */
+let playing=true;
+let progress=32;
+const DURATION=192;
+const CIRC = 2*Math.PI*104;
+const ICIRC = 2*Math.PI*16;
+const heroRing=document.getElementById('heroRing');
+const islandRing=document.getElementById('islandRing');
+heroRing.style.strokeDasharray = CIRC;
+islandRing.style.strokeDasharray = ICIRC;
+
+function updateRings(){
+  const off = CIRC*(1-progress/100);
+  const ioff = ICIRC*(1-progress/100);
+  heroRing.style.strokeDashoffset = off;
+  islandRing.style.strokeDashoffset = ioff;
+}
+updateRings();
+
+const playIcon=document.getElementById('playIcon');
+const islandPlayIcon=document.getElementById('islandPlayIcon');
+const ieq=document.getElementById('ieq');
+
+function togglePlay(){
+  playing=!playing;
+  ieq.classList.toggle('paused', !playing);
+  const svg = playing
+    ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+  playIcon.innerHTML = svg;
+  islandPlayIcon.innerHTML = svg;
+}
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+document.getElementById('islandPlayBtn').addEventListener('click', togglePlay);
+
+setInterval(()=>{
+  if(playing){
+    progress += 100/DURATION;
+    if(progress>=100) progress=0;
+    updateRings();
+  }
+}, 1000);
+
+/* ============================================================
+   INIT
+============================================================ */
+resize();
+selectConcept(0);
+requestAnimationFrame(draw);
+window.addEventListener('load', resize);
+</script>
+</body>
+</html>

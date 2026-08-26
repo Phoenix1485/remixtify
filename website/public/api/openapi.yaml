@@ -1,0 +1,71 @@
+openapi: 3.1.0
+info:
+  title: Remixtify Changelog API
+  version: 1.0.0
+  description: Read-only public catalog for published Remixtify releases.
+paths:
+  /api/v1/changelogs:
+    get:
+      summary: List published changelogs
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+      responses:
+        '200':
+          description: Published changelog catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, limit, offset]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Changelog' }
+                  limit: { type: integer }
+                  offset: { type: integer }
+  /api/v1/changelogs/{slug}:
+    get:
+      summary: Get one published changelog
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,95}$' }
+      responses:
+        '200':
+          description: Changelog
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Changelog' }
+        '404': { description: Not found }
+components:
+  schemas:
+    Changelog:
+      type: object
+      required: [id, slug, version, title, summary, body, status, category, release_date, tags, links, media, devlogs, related, risks]
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        version: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        body: { type: string }
+        status: { type: string, enum: [published] }
+        category: { type: string }
+        release_date: { type: string, format: date }
+        published_at: { type: string, format: date-time }
+        is_breaking: { type: boolean }
+        is_security_release: { type: boolean }
+        source_url: { type: string, format: uri }
+        metadata: { type: object, additionalProperties: true }
+        tags: { type: array, items: { type: string } }
+        links: { type: array, items: { type: object, additionalProperties: true } }
+        media: { type: array, items: { type: object, additionalProperties: true } }
+        devlogs: { type: array, items: { type: object, additionalProperties: true } }
+        related: { type: array, items: { type: object, additionalProperties: true } }
+        risks: { type: array, items: { type: object, additionalProperties: true } }

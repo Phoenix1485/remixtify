@@ -1,0 +1,37 @@
+html.srd-theme-active[data-srd-theme="crimson"] {
+  --srd-panel: #0d080a;
+  --srd-panel-raised: #171012;
+  --srd-canvas: #070506;
+  --srd-border: rgba(255, 101, 116, 0.12);
+  --background-base: #070506 !important;
+  --background-elevated-base: #140d0f !important;
+  --background-elevated-highlight: #211316 !important;
+  --background-tinted-base: rgba(244, 63, 94, 0.065) !important;
+}
+
+html.srd-theme-active[data-srd-theme="crimson"] body {
+  background:
+    radial-gradient(circle at 52% -18%, color-mix(in srgb, var(--srd-primary) 13%, transparent), transparent 38%),
+    #040304 !important;
+}
+
+html.srd-theme-active[data-srd-theme="crimson"] .srd-left-sidebar {
+  background:
+    linear-gradient(155deg, color-mix(in srgb, var(--srd-primary) 15%, transparent), transparent 31%),
+    #0d080a !important;
+}
+
+html.srd-theme-active[data-srd-theme="crimson"] .srd-main-view,
+html.srd-theme-active[data-srd-theme="crimson"] .srd-global-nav {
+  background: #070506 !important;
+}
+
+html.srd-theme-active[data-srd-theme="crimson"] .srd-player {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--srd-primary) 14%, transparent), transparent 42%),
+    #10090b !important;
+}
+
+html.srd-theme-active[data-srd-theme="crimson"] [data-testid="carousel-scroller"] .e-10451-card {
+  background: #140d10 !important;
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.2",
+  "publishedAt": "2026-08-26T23:17:32.784Z",
+  "core": {
+    "entry": "core.js",
+    "integrity": "sha384-E63dWWUAkEBzGLh+YFTtylxA3WXl61qb1mRYRkCXeyYjSOEV1NKBsgHqmYtgN2Zn"
+  },
+  "packages": [
+    {
+      "id": "progress-cat",
+      "name": "Progress Cat",
+      "version": "1.0.0",
+      "description": "A tiny cat that walks along the current song's progress bar.",
+      "author": "Remixify",
+      "entry": "packages/progress-cat.js",
+      "icon": "cat",
+      "type": "extension",
+      "permissions": [
+        "player.read",
+        "ui.progressbar"
+      ],
+      "integrity": "sha384-PoF025PKnfOE1OmalnfGyVsnp19yfypo3pmnxej0LGAXOEkVNiaUybnWFZUr+wXG"
+    },
+    {
+      "id": "focus-panels",
+      "name": "Focus Panels",
+      "version": "1.0.0",
+      "description": "Quietly fades the side panels until you hover or focus them.",
+      "author": "Remixify",
+      "entry": "packages/focus-panels.js",
+      "icon": "focus",
+      "type": "extension",
+      "permissions": [
+        "ui.layout"
+      ],
+      "integrity": "sha384-NOpPQsyRi5gXStMrv0FKSZroSXCu9mzP0FiXmTaE11MyfcHPVREd38+2HucQSO3E"
+    }
+  ],
+  "themes": [
+    {
+      "id": "nocturne",
+      "name": "Nocturne",
+      "description": "Near-black glass with restrained color glow.",
+      "entry": "themes/nocturne.css",
+      "primaryColor": "#7c3aed",
+      "secondaryColor": "#14b8a6",
+      "integrity": "sha384-3VWukFkrYQKvcjA86yh6nj+DWtRHtYsBr9IvkFnYG1Ya92wcVUC0hRETVtT73Pfj"
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon",
+      "description": "Graphite panels with warm amber details.",
+      "entry": "themes/carbon.css",
+      "primaryColor": "#f59e0b",
+      "secondaryColor": "#f97316",
+      "integrity": "sha384-bipsJWTJ6bQFy/djHrdN1Gvusg2iUWnUmthgbRAWxRDO6PO4kODcjBSoZUS4uDNn"
+    },
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "description": "Deep navy surfaces with cyan-violet light.",
+      "entry": "themes/aurora.css",
+      "primaryColor": "#22d3ee",
+      "secondaryColor": "#8b5cf6",
+      "integrity": "sha384-bPoFvh1KvSH7ZbvyGWfnjXeKajous+TdQKl0keUNHjn6c2gwPFHHxaqnSK4cWhvw"
+    },
+    {
+      "id": "crimson",
+      "name": "Crimson",
+      "description": "Ink-black panels with a focused red pulse.",
+      "entry": "themes/crimson.css",
+      "primaryColor": "#ef4444",
+      "secondaryColor": "#f43f5e",
+      "integrity": "sha384-y0JMMrvAaUoPJcYu8XRCylfe/BtGspvM6kIYF9ous4TX441a132Df6DQrE2prvhH"
+    },
+    {
+      "id": "glacier",
+      "name": "Glacier",
+      "description": "Cold slate surfaces with arctic blue light.",
+      "entry": "themes/glacier.css",
+      "primaryColor": "#38bdf8",
+      "secondaryColor": "#a5f3fc",
+      "integrity": "sha384-CBaCIHQ1Nw7zqYDnt8CNaAeoMMJvXH7JATT5QraKwZoDzhUl5cD4UcN/1QWtXeyf"
+    },
+    {
+      "id": "ultraviolet",
+      "name": "Ultraviolet",
+      "description": "Black-violet panels with electric magenta depth.",
+      "entry": "themes/ultraviolet.css",
+      "primaryColor": "#c026d3",
+      "secondaryColor": "#8b5cf6",
+      "integrity": "sha384-HFWu+EmmxN2Y21UhVrB++xDmC/dcjUvTguMcBqcPHcbCA0sEBOgfEWQBU5JileUL"
+    },
+    {
+      "id": "ember",
+      "name": "Ember",
+      "description": "Smoked brown-black with warm coral and amber.",
+      "entry": "themes/ember.css",
+      "primaryColor": "#fb7185",
+      "secondaryColor": "#f59e0b",
+      "integrity": "sha384-Nh6xcx2Bb01tJkcg099Nqe3sLVZhf0XModG3T/NbTQiiNQIg55hkUdu+kITwAgTs"
+    },
+    {
+      "id": "moss",
+      "name": "Moss",
+      "description": "Forest-black surfaces with botanical neon accents.",
+      "entry": "themes/moss.css",
+      "primaryColor": "#84cc16",
+      "secondaryColor": "#2dd4bf",
+      "integrity": "sha384-b9uz1G5WjPxR85MdjCotPoxu7+VuH0Md/r/BdzHL0dPdxvyu7S6yqRffEsARBPH5"
+    },
+    {
+      "id": "monochrome",
+      "name": "Monochrome",
+      "description": "Neutral graphite, silver controls and zero color noise.",
+      "entry": "themes/monochrome.css",
+      "primaryColor": "#e5e7eb",
+      "secondaryColor": "#71717a",
+      "integrity": "sha384-F5z4jf8D/4grz2Wq+bkc6MyweuIDM/wVVvoWILlm2lYD1xap2XTFnSVMWzhTFkBY"
+    },
+    {
+      "id": "synthwave",
+      "name": "Synthwave",
+      "description": "Midnight indigo with pink and cyan signal light.",
+      "entry": "themes/synthwave.css",
+      "primaryColor": "#f472b6",
+      "secondaryColor": "#22d3ee",
+      "integrity": "sha384-Zs45AlgbBBTE9vyyI9pNCcsuaTVOKEKipHMGmXZrn4sH86/c3G9x01oG2o3bp+s4"
+    }
+  ]
+}

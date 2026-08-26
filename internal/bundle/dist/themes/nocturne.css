@@ -1,0 +1,16 @@
+html.srd-theme-active[data-srd-theme="nocturne"] {
+  --srd-panel: #08090b;
+  --srd-panel-raised: #111217;
+  --srd-canvas: #060709;
+  --srd-border: rgba(255, 255, 255, 0.085);
+}
+
+html.srd-theme-active[data-srd-theme="nocturne"] .srd-main-view {
+  background:
+    radial-gradient(circle at 50% -18%, color-mix(in srgb, var(--srd-primary) 7%, transparent), transparent 34%),
+    var(--srd-canvas) !important;
+}
+
+html.srd-theme-active[data-srd-theme="nocturne"] [data-testid="carousel-scroller"] .e-10451-card {
+  background: #0d0e12 !important;
+}

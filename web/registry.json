@@ -1,0 +1,26 @@
+{
+  "packages": [
+    {
+      "id": "progress-cat",
+      "name": "Progress Cat",
+      "version": "1.0.0",
+      "description": "A tiny cat that walks along the current song's progress bar.",
+      "author": "Remixify",
+      "entry": "packages/progress-cat.js",
+      "icon": "cat",
+      "type": "extension",
+      "permissions": ["player.read", "ui.progressbar"]
+    },
+    {
+      "id": "focus-panels",
+      "name": "Focus Panels",
+      "version": "1.0.0",
+      "description": "Quietly fades the side panels until you hover or focus them.",
+      "author": "Remixify",
+      "entry": "packages/focus-panels.js",
+      "icon": "focus",
+      "type": "extension",
+      "permissions": ["ui.layout"]
+    }
+  ]
+}

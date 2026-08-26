@@ -1,0 +1,35 @@
+html.srd-theme-active[data-srd-theme="carbon"] {
+  --srd-panel: #111214;
+  --srd-panel-raised: #191a1d;
+  --srd-canvas: #0b0c0e;
+  --srd-border: rgba(255, 255, 255, 0.105);
+  --background-base: #0b0c0e !important;
+  --background-elevated-base: #16171a !important;
+  --background-elevated-highlight: #202126 !important;
+  --background-tinted-base: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.srd-theme-active[data-srd-theme="carbon"] body {
+  background: linear-gradient(135deg, #08090a, #111214 52%, #090a0c) !important;
+}
+
+html.srd-theme-active[data-srd-theme="carbon"] .srd-left-sidebar {
+  background:
+    linear-gradient(155deg, color-mix(in srgb, var(--srd-primary) 12%, transparent), transparent 31%),
+    #111214 !important;
+}
+
+html.srd-theme-active[data-srd-theme="carbon"] .srd-main-view,
+html.srd-theme-active[data-srd-theme="carbon"] .srd-global-nav {
+  background: #0b0c0e !important;
+}
+
+html.srd-theme-active[data-srd-theme="carbon"] .srd-player {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--srd-primary) 12%, transparent), transparent 40%),
+    #121315 !important;
+}
+
+html.srd-theme-active[data-srd-theme="carbon"] [data-testid="carousel-scroller"] .e-10451-card {
+  background: #16171a !important;
+}

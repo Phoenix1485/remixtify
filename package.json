@@ -1,0 +1,17 @@
+{
+  "name": "remixify",
+  "version": "0.2.2",
+  "private": true,
+  "description": "Remixify CLI and Spotify desktop customization runtime",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:release": "node scripts/build.mjs --release",
+    "check": "tsc --noEmit && go test ./...",
+    "dev": "node scripts/build.mjs --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0"
+  }
+}

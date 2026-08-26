@@ -1,0 +1,38 @@
+html.srd-theme-active[data-srd-theme="aurora"] {
+  --srd-panel: #071018;
+  --srd-panel-raised: #0c1822;
+  --srd-canvas: #050b12;
+  --srd-border: rgba(132, 225, 255, 0.13);
+  --background-base: #050b12 !important;
+  --background-elevated-base: #0a1620 !important;
+  --background-elevated-highlight: #102431 !important;
+  --background-tinted-base: rgba(69, 202, 255, 0.07) !important;
+}
+
+html.srd-theme-active[data-srd-theme="aurora"] body {
+  background:
+    radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--srd-primary) 14%, transparent), transparent 34%),
+    radial-gradient(circle at 92% 100%, color-mix(in srgb, var(--srd-secondary) 12%, transparent), transparent 38%),
+    #03080e !important;
+}
+
+html.srd-theme-active[data-srd-theme="aurora"] .srd-left-sidebar {
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--srd-primary) 13%, transparent), transparent 36%),
+    #071018 !important;
+}
+
+html.srd-theme-active[data-srd-theme="aurora"] .srd-main-view {
+  background:
+    radial-gradient(circle at 52% -10%, color-mix(in srgb, var(--srd-secondary) 9%, transparent), transparent 37%),
+    #050b12 !important;
+}
+
+html.srd-theme-active[data-srd-theme="aurora"] .srd-global-nav,
+html.srd-theme-active[data-srd-theme="aurora"] .srd-player {
+  background: color-mix(in srgb, #071018 94%, var(--srd-primary)) !important;
+}
+
+html.srd-theme-active[data-srd-theme="aurora"] [data-testid="carousel-scroller"] .e-10451-card {
+  background: #0a1520 !important;
+}
