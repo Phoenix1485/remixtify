@@ -1,0 +1,86 @@
+services:
+  website:
+    build:
+      context: ./website
+      args:
+        SITE_URL: '${SITE_URL:?SITE_URL is required}'
+    expose:
+      - '80'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/healthz']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - '/var/cache/nginx:size=16m'
+      - '/var/run:size=1m'
+    security_opt:
+      - 'no-new-privileges:true'
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    expose:
+      - '8080'
+    environment:
+      DB_HOST: database
+      DB_PORT: '3306'
+      DB_NAME: remixtify
+      DB_USER: remixtify
+      DB_PASSWORD: '${MARIADB_PASSWORD:?MARIADB_PASSWORD is required}'
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/healthz']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - '/tmp:size=8m'
+    security_opt:
+      - 'no-new-privileges:true'
+    cap_drop:
+      - ALL
+
+  database:
+    image: 'mariadb:11.4'
+    environment:
+      MARIADB_DATABASE: remixtify
+      MARIADB_USER: remixtify
+      MARIADB_PASSWORD: '${MARIADB_PASSWORD:?MARIADB_PASSWORD is required}'
+      MARIADB_ROOT_PASSWORD: '${MARIADB_ROOT_PASSWORD:?MARIADB_ROOT_PASSWORD is required}'
+    command:
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
+      - '--skip-name-resolve'
+    volumes:
+      - 'remixtify_database:/var/lib/mysql'
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    security_opt:
+      - 'no-new-privileges:true'
+
+volumes:
+  remixtify_database:
