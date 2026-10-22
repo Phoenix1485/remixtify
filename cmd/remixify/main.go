@@ -469,6 +469,13 @@ func installSelf(cfg appconfig.Config) error {
 		if err := os.WriteFile(filepath.Join(cfg.StateDir, "remixify.cmd"), []byte(content), 0o700); err != nil {
 			return err
 		}
+		// Existing desktop shortcuts use this script, including pre-rename installs.
+		// Repair it before removing the old launcher filenames during an update.
+		escapedLauncher := strings.ReplaceAll(launcher, `"`, `""`)
+		launchVBS := "Set shell = CreateObject(\"WScript.Shell\")\r\nshell.Run Chr(34) & \"" + escapedLauncher + "\" & Chr(34) & \" launch\", 0, False\r\n"
+		if err := os.WriteFile(filepath.Join(cfg.StateDir, "launch.vbs"), []byte(launchVBS), 0o700); err != nil {
+			return err
+		}
 		for _, legacyName := range []string{"Remixtify.cmd", "remixtify.cmd", "Spotify Redesign.cmd", "spotify-redesign.cmd"} {
 			if err := os.Remove(filepath.Join(cfg.StateDir, legacyName)); err != nil && !errors.Is(err, os.ErrNotExist) {
 				return err
