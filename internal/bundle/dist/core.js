@@ -2928,90 +2928,318 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
   }
 }
 
-/* Consistent media-card rhythm: equal footprints, visible gutters and bounded copy. */
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] [role="grid"]:has(> [role="row"] .e-10451-card) {
-  box-sizing: border-box !important;
-  column-gap: 12px !important;
-  row-gap: 16px !important;
-  padding-inline: 12px !important;
+/* Home card sizing and text flow are maintained in layout-fixes.css. */
+
+/* Dark liquid glass is intentionally limited to transport controls and page action circles. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] {
+  --srd-liquid-control:
+    radial-gradient(circle at 26% 16%, rgba(255, 255, 255, 0.13), transparent 34%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--srd-primary) 10%, rgba(15, 18, 27, 0.88)),
+      color-mix(in srgb, var(--srd-secondary) 5%, rgba(3, 5, 10, 0.94)) 72%
+    );
+  --srd-liquid-control-hover:
+    radial-gradient(circle at 28% 14%, rgba(255, 255, 255, 0.2), transparent 38%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--srd-primary) 18%, rgba(19, 23, 34, 0.91)),
+      color-mix(in srgb, var(--srd-secondary) 8%, rgba(4, 6, 12, 0.96)) 76%
+    );
+  --srd-liquid-border: color-mix(in srgb, var(--srd-primary) 22%, rgba(255, 255, 255, 0.22));
+  --srd-liquid-border-hover: color-mix(in srgb, var(--srd-primary) 48%, rgba(255, 255, 255, 0.34));
+  --srd-liquid-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -7px 16px rgba(0, 0, 0, 0.2),
+    0 9px 22px rgba(0, 0, 0, 0.3);
 }
 
-/* Full-width bento shelves inherit Spotify's negative carousel bleed; compensate so the first card keeps the same inset. */
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"]:nth-of-type(3n + 1):has(.e-10451-card) [data-testid="carousel-scroller"] {
-  padding-inline: 39px !important;
-  scroll-padding-inline: 39px !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] [role="grid"] > [role="row"]:has(.e-10451-card),
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] [role="grid"] > [role="row"]:has(.e-10451-card) > [role="gridcell"] > [role="presentation"] {
-  box-sizing: border-box !important;
-  height: 276px !important;
-  min-height: 276px !important;
-  max-height: 276px !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] .e-10451-card {
-  box-sizing: border-box !important;
-  width: 100% !important;
-  height: 276px !important;
-  min-height: 276px !important;
-  max-height: 276px !important;
-  overflow: hidden !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] .e-10451-card__main {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] .e-10451-card__column {
-  min-width: 0 !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] .e-10451-card [data-encore-id="cardTitle"] .e-10451-line-clamp {
-  --encore-line-clamp: 2 !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] .e-10451-card [data-encore-id="cardSubtitle"] .e-10451-line-clamp {
-  --encore-line-clamp: 1 !important;
-  display: block !important;
-  max-height: 20px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
-  [data-testid="component-shelf"] .e-10451-card [data-encore-id="cardSubtitle"] .e-10451-line-clamp * {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] :is(
-  .e-10451-card,
-  .main-card-card,
-  [data-testid="card-container"]
-) :is(
-  [data-encore-id="cardTitle"],
-  [data-testid="card-title"]
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="playback-controls"] button,
+  [data-testid="action-bar-row"] button:not([role="combobox"])
 ) {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  position: relative !important;
+  isolation: isolate;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  border: 1px solid var(--srd-liquid-border) !important;
+  border-radius: 999px !important;
+  color: color-mix(in srgb, var(--srd-primary) 12%, rgba(248, 250, 255, 0.9)) !important;
+  background: var(--srd-liquid-control) !important;
+  box-shadow: var(--srd-liquid-shadow) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5) contrast(1.04) !important;
+  backdrop-filter: blur(24px) saturate(1.5) contrast(1.04) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-app-region: no-drag;
+  transform: translateZ(0) !important;
+  transition:
+    color 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease,
+    transform 170ms cubic-bezier(0.2, 0.75, 0.25, 1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="playback-controls"] button,
+  [data-testid="action-bar-row"] button:not([role="combobox"])
+)::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 1px 4px auto;
+  height: 42%;
+  border-radius: 999px 999px 55% 55%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="playback-controls"] button,
+  [data-testid="action-bar-row"] button:not([role="combobox"])
+) > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="playback-controls"] button,
+  [data-testid="action-bar-row"] button:not([role="combobox"])
+):is(:hover, :focus-visible) {
+  border-color: var(--srd-liquid-border-hover) !important;
+  color: white !important;
+  background: var(--srd-liquid-control-hover) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.24),
+    0 0 0 1px color-mix(in srgb, var(--srd-primary) 18%, transparent),
+    0 12px 28px rgba(0, 0, 0, 0.38) !important;
+  outline: none !important;
+  transform: translateY(-2px) scale(1.025) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="playback-controls"] button,
+  [data-testid="action-bar-row"] button:not([role="combobox"])
+):active {
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.42),
+    inset 0 1px rgba(255, 255, 255, 0.08),
+    0 5px 13px rgba(0, 0, 0, 0.28) !important;
+  transform: translateY(0) scale(0.94) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="playback-controls"] button,
+  [data-testid="action-bar-row"] button:not([role="combobox"])
+)[disabled] {
+  cursor: default !important;
+  filter: saturate(0.45) !important;
+  opacity: 0.42 !important;
+  transform: none !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body
+  .srd-player [data-testid="playback-controls"] {
+  gap: 7px !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body
+  .srd-player [data-testid="playback-controls"] button {
+  flex: 0 0 40px !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body
+  .srd-player [data-testid="playback-controls"] [data-testid="play-button"] {
+  flex: 0 0 46px !important;
+  width: 46px !important;
+  min-width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  border-color: color-mix(in srgb, var(--srd-primary) 48%, rgba(255, 255, 255, 0.32)) !important;
+  color: white !important;
+  background:
+    radial-gradient(circle at 28% 15%, rgba(255, 255, 255, 0.23), transparent 34%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--srd-primary) 32%, rgba(16, 19, 29, 0.94)),
+      color-mix(in srgb, var(--srd-secondary) 13%, rgba(3, 5, 11, 0.98)) 76%
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.23),
+    inset 0 -9px 18px rgba(0, 0, 0, 0.25),
+    0 0 0 1px color-mix(in srgb, var(--srd-primary) 14%, transparent),
+    0 12px 30px color-mix(in srgb, var(--srd-primary) 20%, rgba(0, 0, 0, 0.44)) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body
+  [data-testid="action-bar-row"] button[data-testid="play-button"] {
+  flex: 0 0 52px !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  border-color: color-mix(in srgb, var(--srd-primary) 48%, rgba(255, 255, 255, 0.32)) !important;
+  color: white !important;
+  background:
+    radial-gradient(circle at 28% 15%, rgba(255, 255, 255, 0.23), transparent 34%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--srd-primary) 32%, rgba(16, 19, 29, 0.94)),
+      color-mix(in srgb, var(--srd-secondary) 13%, rgba(3, 5, 11, 0.98)) 76%
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.23),
+    inset 0 -9px 18px rgba(0, 0, 0, 0.25),
+    0 0 0 1px color-mix(in srgb, var(--srd-primary) 14%, transparent),
+    0 12px 30px color-mix(in srgb, var(--srd-primary) 20%, rgba(0, 0, 0, 0.44)) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"]
+  button:not([role="combobox"])[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--srd-primary) 68%, white) !important;
+  color: color-mix(in srgb, var(--srd-primary) 36%, white) !important;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--srd-primary) 28%, transparent),
+    0 10px 26px color-mix(in srgb, var(--srd-primary) 18%, rgba(0, 0, 0, 0.38)) !important;
+}
+
+/* Theme-aware futuristic caption controls. Native window click handlers stay untouched. */
+html.srd-theme-active[data-srd-theme] body .srd-window-controls {
+  position: relative !important;
+  isolation: isolate;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  box-sizing: border-box !important;
+  min-height: 42px !important;
+  padding: 4px !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--srd-primary) 20%, rgba(255, 255, 255, 0.14)) !important;
+  border-radius: 16px !important;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--srd-primary) 16%, transparent), transparent 44%),
+    linear-gradient(150deg, rgba(15, 18, 28, 0.86), rgba(3, 5, 10, 0.94)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.2),
+    0 10px 28px rgba(0, 0, 0, 0.34) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.55) !important;
+  backdrop-filter: blur(26px) saturate(1.55) !important;
+}
+
+html.srd-theme-active[data-srd-theme] body .srd-window-controls::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0 12px auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--srd-primary) 58%, white), transparent);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+html.srd-theme-active[data-srd-theme] body .srd-window-control {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  position: relative !important;
+  z-index: 2 !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+  color: color-mix(in srgb, var(--srd-primary) 8%, rgba(244, 247, 255, 0.78)) !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.055) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.35) !important;
+  backdrop-filter: blur(18px) saturate(1.35) !important;
+  cursor: default !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-app-region: no-drag;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms cubic-bezier(0.2, 0.75, 0.25, 1) !important;
+}
+
+html.srd-theme-active[data-srd-theme] body .srd-window-control:is(:hover, :focus-visible) {
+  border-color: color-mix(in srgb, var(--srd-primary) 42%, rgba(255, 255, 255, 0.2)) !important;
+  color: white !important;
+  background:
+    radial-gradient(circle at 30% 10%, rgba(255, 255, 255, 0.14), transparent 44%),
+    color-mix(in srgb, var(--srd-primary) 14%, rgba(255, 255, 255, 0.045)) !important;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.13),
+    0 0 0 1px color-mix(in srgb, var(--srd-primary) 12%, transparent),
+    0 7px 18px rgba(0, 0, 0, 0.3) !important;
+  outline: none !important;
+  transform: translateY(-1px) !important;
+}
+
+html.srd-theme-active[data-srd-theme] body .srd-window-control:focus-visible {
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.13),
+    0 0 0 2px color-mix(in srgb, var(--srd-primary) 54%, transparent),
+    0 7px 18px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.srd-theme-active[data-srd-theme] body .srd-window-control:active {
+  background: color-mix(in srgb, var(--srd-primary) 10%, rgba(0, 0, 0, 0.34)) !important;
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.38) !important;
+  transform: translateY(0) scale(0.93) !important;
+}
+
+html.srd-theme-active[data-srd-theme] body .srd-window-control[data-srd-window-action="close"]:hover {
+  border-color: color-mix(in srgb, #ff5b70 70%, var(--srd-primary)) !important;
+  background:
+    radial-gradient(circle at 30% 10%, rgba(255, 255, 255, 0.18), transparent 42%),
+    color-mix(in srgb, #d92e49 78%, var(--srd-primary)) !important;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.18),
+    0 0 18px color-mix(in srgb, #e43d58 28%, transparent) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.srd-theme-active[data-srd-theme] body :is(
+    .srd-player [data-testid="playback-controls"] button,
+    [data-testid="action-bar-row"] button:not([role="combobox"]),
+    .srd-window-control
+  ) {
+    transition: none !important;
+  }
 }
 `;
+
+  // web/src/layout-fixes.css
+  var layout_fixes_default = '/* Remixify: nach core.css laden. Die Nummern entsprechen den acht Grafik-Fixes.\n   Nur das aktive Studio-Layout; Farben und Blur bleiben an die Einstellungen gekoppelt. */\n\n/* 8. Design-System: 16/12/8 px Radien, 8/16/24 px Abst\xE4nde, ein Glas-Material. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] {\n  --srd-radius-panel: 16px;\n  --srd-radius-card: 12px;\n  --srd-radius-button: 8px;\n  --srd-space-1: 8px;\n  --srd-space-2: 16px;\n  --srd-space-3: 24px;\n  --srd-muted: #b8c2d1;\n  --srd-text: #f4f7fc;\n  --srd-surface: #101923;\n  --srd-glass-surface: rgb(10 18 28 / 86%);\n  --srd-glass-fill: linear-gradient(145deg, rgb(255 255 255 / 7%), transparent 60%), var(--srd-glass-surface);\n  --srd-readable-accent: color-mix(in srgb, var(--srd-secondary) 55%, white);\n  --text-base: var(--srd-text) !important;\n  --text-subdued: var(--srd-muted) !important;\n  --essential-subdued: var(--srd-muted) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(\n  .srd-global-nav, .srd-left-sidebar, .srd-main-view, .srd-player-zone,\n  [data-testid="home-page"] [data-testid="component-shelf"]\n) {\n  box-sizing: border-box !important;\n  min-width: 0 !important;\n  min-height: 0 !important;\n  border-radius: var(--srd-radius-panel) !important;\n  background: var(--srd-glass-fill) !important;\n  -webkit-backdrop-filter: blur(var(--srd-glass-blur, 24px)) saturate(1.3) !important;\n  backdrop-filter: blur(var(--srd-glass-blur, 24px)) saturate(1.3) !important;\n}\n\n/* 1. Die Kopfzeile belegt die ganze Breite. Das Cover beginnt erst darunter. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-grid {\n  grid-template-areas:\n    "global-nav global-nav global-nav"\n    "left-sidebar main-view now-playing-bar" !important;\n  grid-template-columns: min(var(--srd-library-width, 260px), 26vw) minmax(0, 1fr) clamp(280px, 24vw, 360px) !important;\n  grid-template-rows: 64px minmax(0, 1fr) !important;\n  gap: var(--srd-space-2) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav {\n  padding-inline-end: var(--srd-space-1) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-window-controls {\n  position: relative !important;\n  inset: auto !important;\n  flex: 0 0 auto !important;\n  align-self: center;\n  margin: 0 var(--srd-space-1) 0 var(--srd-space-2) !important;\n  border-radius: var(--srd-radius-card) !important;\n  background: var(--srd-glass-fill) !important;\n  -webkit-backdrop-filter: blur(var(--srd-glass-blur, 24px)) !important;\n  backdrop-filter: blur(var(--srd-glass-blur, 24px)) !important;\n  -webkit-app-region: no-drag;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(\n  .srd-window-control, .srd-settings-button, .srd-update-button\n) {\n  border-radius: var(--srd-radius-button) !important;\n  color: var(--srd-text) !important;\n}\n\n/* 2. Nur die Hintergrund-Layer aus Spotifys Home-CSS ersetzen, nie Inhalte maskieren.\n   Der Theme-Akzent verhindert fremde Orange-T\xF6ne; Cover-Farben werden nicht erzwungen. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] {\n  isolation: isolate;\n  background: linear-gradient(180deg, color-mix(in srgb, var(--srd-primary) 20%, transparent), transparent 340px) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-view :is(\n  .Q7ciR0kAsukiCprc, /* dwp-home-header.css: dekorativer Home-Hintergrund */\n  .kRkvH3JcI5sYgH6J  /* dwp-home-chips-row.css: Hintergrund der klebenden Filter */\n) {\n  background: linear-gradient(180deg, color-mix(in srgb, var(--srd-primary) 24%, var(--srd-surface)), transparent) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-view .kRkvH3JcI5sYgH6J {\n  bottom: calc(-1 * var(--srd-space-3)) !important;\n  pointer-events: none;\n}\n\n/* 3. Auch Spotifys neue verschachtelte Home-Shelves verwenden 24 px Zeilenabstand. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] :is(\n  .contentSpacing:has([data-testid="component-shelf"]), .dqY3Tbw0iFQKYoz5\n) {\n  gap: var(--srd-space-3) !important;\n  --shelf-gap-vertical: var(--srd-space-3);\n  --shelf-gap-horizontal: var(--srd-space-3);\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] [data-testid="component-shelf"] {\n  margin: 0 !important;\n  padding: var(--srd-space-2) !important;\n  height: auto !important;\n  max-height: none !important;\n  --shelf-fixed-max-height: none;\n  --extracted-text-subdued: var(--srd-muted);\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] [data-testid="rich-title-row-shelf-header"] {\n  padding-inline: 0 !important;\n  margin-bottom: var(--srd-space-2) !important;\n}\n\n/* 4. Echte horizontale Scrollfl\xE4che mit sichtbarer, schmaler Scrollbar.\n   Keine Maske auf Text oder Fokusrahmen; die letzte Karte ist vollst\xE4ndig erreichbar. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] [data-testid="carousel-scroller"] {\n  box-sizing: border-box !important;\n  min-width: 0 !important;\n  max-width: 100% !important;\n  width: 100% !important;\n  margin-inline: 0 !important;\n  padding: var(--srd-space-1) var(--srd-space-1) var(--srd-space-2) !important;\n  overflow-x: auto !important;\n  overflow-y: hidden !important;\n  scroll-padding-inline: var(--srd-space-1) !important;\n  scroll-snap-type: x proximity;\n  scrollbar-width: thin;\n  scrollbar-color: var(--srd-muted) transparent;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] :is([role="grid"], [data-testid="grid-container"]) {\n  column-gap: var(--srd-space-2) !important;\n  row-gap: var(--srd-space-2) !important;\n  padding-inline: 0 !important;\n}\n\n/* 4 + 5. Keine festen 276 px: Bild und zwei Textzeilen d\xFCrfen die H\xF6he bestimmen. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] [role="grid"] > [role="row"]:has(.e-10451-card),\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] [role="grid"] > [role="row"]:has(.e-10451-card) > [role="gridcell"] > [role="presentation"] {\n  height: auto !important;\n  min-height: 0 !important;\n  max-height: none !important;\n  align-items: stretch !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"]) {\n  box-sizing: border-box !important;\n  height: auto !important;\n  min-height: 0 !important;\n  max-height: none !important;\n  min-width: 0 !important;\n  max-width: 214px !important;\n  width: 100% !important;\n  padding: var(--srd-space-2) !important;\n  gap: var(--srd-space-1) !important;\n  overflow: visible !important;\n  border-radius: var(--srd-radius-card) !important;\n  scroll-snap-align: start;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] :is(.e-10451-card__main, .e-10451-card__column) {\n  flex: 0 0 auto !important;\n  min-width: 0 !important;\n  min-height: min-content !important;\n  max-width: 100% !important;\n  overflow: visible !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"])\n  :is([data-encore-id="cardTitle"], [data-testid="card-title"], .e-10451-card-title,\n      [data-encore-id="cardSubtitle"], .main-card-cardDescription) {\n  --encore-line-clamp: 2 !important;\n  display: -webkit-box !important;\n  -webkit-box-orient: vertical !important;\n  -webkit-line-clamp: 2 !important;\n  min-width: 0 !important;\n  max-width: 100% !important;\n  max-height: none !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: normal !important;\n  overflow-wrap: anywhere;\n  line-height: 1.45 !important;\n  padding-bottom: 2px;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] :is([data-encore-id="cardSubtitle"], .main-card-cardDescription),\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player [data-testid="context-item-info-subtitles"] {\n  color: var(--srd-muted) !important;\n  opacity: 1 !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]\n  [data-testid="component-shelf"] [data-encore-id="cardSubtitle"] :is(.e-10451-line-clamp, a, span) {\n  --encore-line-clamp: 2 !important;\n  max-height: none !important;\n  white-space: normal !important;\n  color: inherit !important;\n}\n\n/* 5. Bildfl\xE4che bleibt quadratisch und schrumpft nicht unter Textdruck.\n   Hintergrund dient als Fallback; src/srcset, background-image und Lazy Loading bleiben erhalten. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(\n  .e-10451-card > .e-10451-image__container, .main-card-imageContainer\n) {\n  flex-shrink: 0 !important;\n  width: 100% !important;\n  height: auto !important;\n  aspect-ratio: 1;\n  overflow: hidden !important;\n  border-radius: var(--srd-radius-card) !important;\n  background-color: var(--srd-surface) !important;\n  background-image: linear-gradient(135deg, color-mix(in srgb, var(--srd-primary) 28%, var(--srd-surface)), var(--srd-surface));\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(\n  img[data-testid="card-image"], .e-10451-image__container > img, .main-card-imageContainer > img\n) {\n  display: block;\n  width: 100% !important;\n  height: 100% !important;\n  object-fit: cover !important;\n  border-radius: var(--srd-radius-card) !important;\n}\n\n/* Native Platzhalter-Icons nutzen dieselbe lesbare Farbe; Ladezust\xE4nde nicht vort\xE4uschen. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .e-10451-image__placeholder-icon {\n  color: var(--srd-muted) !important;\n}\n\n/* Nur das zus\xE4tzliche Liked-Songs-Badge innerhalb des Covers versetzen. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"]\n  :is(.e-10451-card, [data-testid="card-container"]):has(a[href$="/collection/tracks"])\n  .e-10451-image__container :is(.e-10451-image__container, [data-testid="liked-songs-icon"]) {\n  position: absolute !important;\n  inset: auto auto var(--srd-space-1) var(--srd-space-1) !important;\n  width: 40px !important;\n  height: 40px !important;\n  margin: 0 !important;\n  border: 1px solid rgb(255 255 255 / 24%);\n  border-radius: var(--srd-radius-button) !important;\n  overflow: hidden !important;\n  box-shadow: 0 3px 12px rgb(0 0 0 / 30%);\n}\n\n/* 6. Der Bibliotheks-Viewport scrollt; die letzte Zeile bekommt 24 px Auslauf. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar > nav {\n  display: flex !important;\n  flex-direction: column !important;\n  min-height: 0 !important;\n  padding-top: 64px !important;\n  padding-bottom: var(--srd-space-1) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar .YourLibraryX {\n  flex: 1 1 auto !important;\n  min-height: 0 !important;\n  overflow: hidden !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(\n  .main-yourLibraryX-library, .os-viewport, [data-testid="library-list"]\n) {\n  min-height: 0 !important;\n  overflow-y: auto !important;\n  overflow-x: hidden !important;\n  overscroll-behavior: contain;\n  scrollbar-width: thin;\n  scrollbar-color: var(--srd-muted) transparent;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(\n  [role="grid"], [data-testid="library-list"]\n) {\n  box-sizing: border-box !important;\n  padding-bottom: var(--srd-space-3) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(\n  [role="row"], .main-yourLibraryX-listItem\n) {\n  min-height: 64px !important;\n  gap: var(--srd-space-1) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(\n  .e-10451-image__container, .e-10451-image, [data-testid="cover-art-image"],\n  [data-testid="playlist-image"], .main-yourLibraryX-listItem img\n) {\n  box-sizing: border-box !important;\n  flex: 0 0 48px !important;\n  width: 48px !important;\n  min-width: 48px !important;\n  height: 48px !important;\n  min-height: 48px !important;\n  object-fit: cover !important;\n  border-radius: var(--srd-radius-button) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(\n  .main-yourLibraryX-header, .main-yourLibraryX-headerContent\n) {\n  display: flex !important;\n  align-items: center !important;\n  gap: var(--srd-space-1) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(\n  .main-yourLibraryX-header, .main-yourLibraryX-headerContent\n) button {\n  display: grid !important;\n  place-items: center !important;\n  flex-shrink: 0;\n  min-width: 32px;\n  min-height: 32px;\n  border-radius: var(--srd-radius-button) !important;\n}\n\n/* 7. Cover und Controls flie\xDFen in einer Karte. Kein absoluter Footer mit Leerraum. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone {\n  display: flex !important;\n  flex-direction: column !important;\n  align-self: start;\n  height: auto !important;\n  max-height: 100% !important;\n  overflow-x: hidden !important;\n  overflow-y: auto !important;\n  scrollbar-width: thin;\n  scrollbar-color: var(--srd-muted) transparent;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone::before,\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone::after,\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork::after {\n  display: none !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork {\n  position: relative !important;\n  inset: auto !important;\n  flex: 0 0 auto;\n  width: 100% !important;\n  height: auto !important;\n  aspect-ratio: 1;\n  border-radius: var(--srd-radius-panel) var(--srd-radius-panel) 0 0;\n  -webkit-mask-image: linear-gradient(180deg, black 65%, transparent 100%);\n  mask-image: linear-gradient(180deg, black 65%, transparent 100%);\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork img {\n  display: block;\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork--empty img {\n  visibility: hidden;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork--empty {\n  display: none !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player {\n  position: relative !important;\n  inset: auto !important;\n  flex: 0 0 auto !important;\n  min-height: 0 !important;\n  padding: var(--srd-space-2) !important;\n  gap: var(--srd-space-2) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  [data-testid="now-playing-widget"], [data-testid="now-playing-header"]\n) {\n  align-items: center !important;\n  gap: var(--srd-space-1) !important;\n  min-width: 0 !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player\n  [data-testid="now-playing-widget"] > :last-child:has(button) {\n  display: flex !important;\n  align-items: center !important;\n  gap: var(--srd-space-1) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  [data-testid="general-controls"], [class*="nowPlayingBar-right"]\n) {\n  display: flex !important;\n  align-items: center !important;\n  justify-content: center !important;\n  flex-wrap: wrap;\n  gap: var(--srd-space-1) !important;\n  opacity: 1 !important;\n  color: var(--srd-muted) !important;\n}\n\n/* Helle inaktive Symbole statt multiplizierter Opacity; Aktivzustand bleibt eindeutig. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]\n) {\n  opacity: 1 !important;\n  color: var(--srd-muted) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]\n):is([aria-checked="true"], [aria-checked="mixed"], [aria-pressed="true"], [data-active="true"]) {\n  color: var(--srd-readable-accent) !important;\n  border-color: currentColor !important;\n  background: color-mix(in srgb, var(--srd-secondary) 20%, var(--srd-surface)) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]\n):is(:disabled, [aria-disabled="true"]) {\n  opacity: 0.55 !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  .playback-bar, :has(> [data-testid="playback-position"]),\n  .main-volumeBar-volumeBar, [data-testid="volume-bar"]\n) {\n  display: flex !important;\n  align-items: center !important;\n  gap: var(--srd-space-1) !important;\n  min-width: 0 !important;\n  min-height: 24px;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player\n  :has(> [data-testid="playback-position"]) > :has([data-testid="playback-progressbar"]) {\n  flex: 1 1 auto;\n  min-width: 0;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  [data-testid="playback-position"], [data-testid="playback-duration"]\n) {\n  flex: 0 0 auto;\n  width: auto !important;\n  color: var(--srd-muted) !important;\n  font-size: 11px;\n  line-height: 1.5;\n  font-variant-numeric: tabular-nums;\n  white-space: nowrap;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(\n  .main-volumeBar-volumeBar, [data-testid="volume-bar"]\n) {\n  flex: 1 1 96px;\n  max-width: 128px;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player [data-testid="progress-bar-background"] {\n  height: 4px !important;\n  border-radius: 999px !important;\n  background: rgb(184 194 209 / 30%) !important;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player input[type="range"] {\n  margin: 0;\n  min-width: 0;\n  accent-color: var(--srd-readable-accent);\n}\n\n/* 8. Fokus bleibt sichtbar; Scrollbars passen auch auf \xE4lteren Chromium-Versionen. */\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(\n  .srd-player, .srd-left-sidebar, [data-testid="component-shelf"]\n) :is(button, a, [role="slider"]):focus-visible {\n  outline: 2px solid var(--srd-readable-accent) !important;\n  outline-offset: 2px;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(\n  .srd-left-sidebar *, .srd-player-zone, [data-testid="component-shelf"] [data-testid="carousel-scroller"]\n)::-webkit-scrollbar {\n  width: 6px;\n  height: 6px;\n}\n\nhtml.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(\n  .srd-left-sidebar *, .srd-player-zone, [data-testid="component-shelf"] [data-testid="carousel-scroller"]\n)::-webkit-scrollbar-thumb {\n  border-radius: 999px;\n  background: var(--srd-muted);\n}\n\n/* Kleine Fenster: Home-Shelves einspaltig, Player im normalen Fluss unter dem Inhalt. */\n@media (max-width: 1120px) {\n  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-grid {\n    grid-template-areas: "global-nav global-nav" "left-sidebar main-view" "now-playing-bar now-playing-bar" !important;\n    grid-template-columns: min(var(--srd-library-width, 220px), 30vw) minmax(0, 1fr) !important;\n    grid-template-rows: 64px minmax(0, 1fr) auto !important;\n  }\n\n  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] > .contentSpacing {\n    grid-template-columns: minmax(0, 1fr) !important;\n    padding-inline: var(--srd-space-2) !important;\n  }\n\n  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone {\n    width: 100%;\n    max-height: 40vh !important;\n  }\n\n  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork {\n    display: none !important;\n  }\n\n  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player {\n    display: flex !important;\n    min-width: 0 !important;\n  }\n}\n';
 
   // web/src/core.ts
   var SETTINGS_KEY = "spotify-redesign:settings:v2";
@@ -3579,7 +3807,8 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testi
     if (document.getElementById(STYLE_ID)) return;
     const style = element("style");
     style.id = STYLE_ID;
-    style.textContent = core_default;
+    style.textContent = `${core_default}
+${layout_fixes_default}`;
     document.head.appendChild(style);
   }
   function makeToggle(value, onChange) {

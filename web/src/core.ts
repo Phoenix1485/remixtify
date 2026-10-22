@@ -1,4 +1,5 @@
 import styles from "./core.css";
+import layoutFixes from "./layout-fixes.css";
 import type {
   PackageDefinition,
   PackageLifecycle,
@@ -656,7 +657,7 @@ function injectCoreStyle(): void {
   if (document.getElementById(STYLE_ID)) return;
   const style = element("style");
   style.id = STYLE_ID;
-  style.textContent = styles;
+  style.textContent = `${styles}\n${layoutFixes}`;
   document.head.appendChild(style);
 }
 

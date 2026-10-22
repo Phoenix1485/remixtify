@@ -1,0 +1,525 @@
+/* Remixify: nach core.css laden. Die Nummern entsprechen den acht Grafik-Fixes.
+   Nur das aktive Studio-Layout; Farben und Blur bleiben an die Einstellungen gekoppelt. */
+
+/* 8. Design-System: 16/12/8 px Radien, 8/16/24 px Abstände, ein Glas-Material. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] {
+  --srd-radius-panel: 16px;
+  --srd-radius-card: 12px;
+  --srd-radius-button: 8px;
+  --srd-space-1: 8px;
+  --srd-space-2: 16px;
+  --srd-space-3: 24px;
+  --srd-muted: #b8c2d1;
+  --srd-text: #f4f7fc;
+  --srd-surface: #101923;
+  --srd-glass-surface: rgb(10 18 28 / 86%);
+  --srd-glass-fill: linear-gradient(145deg, rgb(255 255 255 / 7%), transparent 60%), var(--srd-glass-surface);
+  --srd-readable-accent: color-mix(in srgb, var(--srd-secondary) 55%, white);
+  --text-base: var(--srd-text) !important;
+  --text-subdued: var(--srd-muted) !important;
+  --essential-subdued: var(--srd-muted) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-global-nav, .srd-left-sidebar, .srd-main-view, .srd-player-zone,
+  [data-testid="home-page"] [data-testid="component-shelf"]
+) {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border-radius: var(--srd-radius-panel) !important;
+  background: var(--srd-glass-fill) !important;
+  -webkit-backdrop-filter: blur(var(--srd-glass-blur, 24px)) saturate(1.3) !important;
+  backdrop-filter: blur(var(--srd-glass-blur, 24px)) saturate(1.3) !important;
+}
+
+/* 1. Die Kopfzeile belegt die ganze Breite. Das Cover beginnt erst darunter. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-grid {
+  grid-template-areas:
+    "global-nav global-nav global-nav"
+    "left-sidebar main-view now-playing-bar" !important;
+  grid-template-columns: min(var(--srd-library-width, 260px), 26vw) minmax(0, 1fr) clamp(280px, 24vw, 360px) !important;
+  grid-template-rows: 64px minmax(0, 1fr) !important;
+  gap: var(--srd-space-2) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav {
+  padding-inline-end: var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-window-controls {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  align-self: center;
+  margin: 0 var(--srd-space-1) 0 var(--srd-space-2) !important;
+  border-radius: var(--srd-radius-card) !important;
+  background: var(--srd-glass-fill) !important;
+  -webkit-backdrop-filter: blur(var(--srd-glass-blur, 24px)) !important;
+  backdrop-filter: blur(var(--srd-glass-blur, 24px)) !important;
+  -webkit-app-region: no-drag;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-window-control, .srd-settings-button, .srd-update-button
+) {
+  border-radius: var(--srd-radius-button) !important;
+  color: var(--srd-text) !important;
+}
+
+/* 2. Nur die Hintergrund-Layer aus Spotifys Home-CSS ersetzen, nie Inhalte maskieren.
+   Der Theme-Akzent verhindert fremde Orange-Töne; Cover-Farben werden nicht erzwungen. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] {
+  isolation: isolate;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--srd-primary) 20%, transparent), transparent 340px) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-view :is(
+  .Q7ciR0kAsukiCprc, /* dwp-home-header.css: dekorativer Home-Hintergrund */
+  .kRkvH3JcI5sYgH6J  /* dwp-home-chips-row.css: Hintergrund der klebenden Filter */
+) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--srd-primary) 24%, var(--srd-surface)), transparent) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-view .kRkvH3JcI5sYgH6J {
+  bottom: calc(-1 * var(--srd-space-3)) !important;
+  pointer-events: none;
+}
+
+/* 3. Auch Spotifys neue verschachtelte Home-Shelves verwenden 24 px Zeilenabstand. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] :is(
+  .contentSpacing:has([data-testid="component-shelf"]), .dqY3Tbw0iFQKYoz5
+) {
+  gap: var(--srd-space-3) !important;
+  --shelf-gap-vertical: var(--srd-space-3);
+  --shelf-gap-horizontal: var(--srd-space-3);
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] [data-testid="component-shelf"] {
+  margin: 0 !important;
+  padding: var(--srd-space-2) !important;
+  height: auto !important;
+  max-height: none !important;
+  --shelf-fixed-max-height: none;
+  --extracted-text-subdued: var(--srd-muted);
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] [data-testid="rich-title-row-shelf-header"] {
+  padding-inline: 0 !important;
+  margin-bottom: var(--srd-space-2) !important;
+}
+
+/* 4. Echte horizontale Scrollfläche mit sichtbarer, schmaler Scrollbar.
+   Keine Maske auf Text oder Fokusrahmen; die letzte Karte ist vollständig erreichbar. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] [data-testid="carousel-scroller"] {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin-inline: 0 !important;
+  padding: var(--srd-space-1) var(--srd-space-1) var(--srd-space-2) !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-padding-inline: var(--srd-space-1) !important;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--srd-muted) transparent;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] :is([role="grid"], [data-testid="grid-container"]) {
+  column-gap: var(--srd-space-2) !important;
+  row-gap: var(--srd-space-2) !important;
+  padding-inline: 0 !important;
+}
+
+/* 4 + 5. Keine festen 276 px: Bild und zwei Textzeilen dürfen die Höhe bestimmen. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] [role="grid"] > [role="row"]:has(.e-10451-card),
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] [role="grid"] > [role="row"]:has(.e-10451-card) > [role="gridcell"] > [role="presentation"] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  align-items: stretch !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"]) {
+  box-sizing: border-box !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  max-width: 214px !important;
+  width: 100% !important;
+  padding: var(--srd-space-2) !important;
+  gap: var(--srd-space-1) !important;
+  overflow: visible !important;
+  border-radius: var(--srd-radius-card) !important;
+  scroll-snap-align: start;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] :is(.e-10451-card__main, .e-10451-card__column) {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  min-height: min-content !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"])
+  :is([data-encore-id="cardTitle"], [data-testid="card-title"], .e-10451-card-title,
+      [data-encore-id="cardSubtitle"], .main-card-cardDescription) {
+  --encore-line-clamp: 2 !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  line-height: 1.45 !important;
+  padding-bottom: 2px;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] :is([data-encore-id="cardSubtitle"], .main-card-cardDescription),
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player [data-testid="context-item-info-subtitles"] {
+  color: var(--srd-muted) !important;
+  opacity: 1 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] [data-encore-id="cardSubtitle"] :is(.e-10451-line-clamp, a, span) {
+  --encore-line-clamp: 2 !important;
+  max-height: none !important;
+  white-space: normal !important;
+  color: inherit !important;
+}
+
+/* 5. Bildfläche bleibt quadratisch und schrumpft nicht unter Textdruck.
+   Hintergrund dient als Fallback; src/srcset, background-image und Lazy Loading bleiben erhalten. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(
+  .e-10451-card > .e-10451-image__container, .main-card-imageContainer
+) {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+  overflow: hidden !important;
+  border-radius: var(--srd-radius-card) !important;
+  background-color: var(--srd-surface) !important;
+  background-image: linear-gradient(135deg, color-mix(in srgb, var(--srd-primary) 28%, var(--srd-surface)), var(--srd-surface));
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(
+  img[data-testid="card-image"], .e-10451-image__container > img, .main-card-imageContainer > img
+) {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: var(--srd-radius-card) !important;
+}
+
+/* Native Platzhalter-Icons nutzen dieselbe lesbare Farbe; Ladezustände nicht vortäuschen. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .e-10451-image__placeholder-icon {
+  color: var(--srd-muted) !important;
+}
+
+/* Nur das zusätzliche Liked-Songs-Badge innerhalb des Covers versetzen. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"]
+  :is(.e-10451-card, [data-testid="card-container"]):has(a[href$="/collection/tracks"])
+  .e-10451-image__container :is(.e-10451-image__container, [data-testid="liked-songs-icon"]) {
+  position: absolute !important;
+  inset: auto auto var(--srd-space-1) var(--srd-space-1) !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: var(--srd-radius-button) !important;
+  overflow: hidden !important;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 30%);
+}
+
+/* 6. Der Bibliotheks-Viewport scrollt; die letzte Zeile bekommt 24 px Auslauf. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar > nav {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  padding-top: 64px !important;
+  padding-bottom: var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar .YourLibraryX {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(
+  .main-yourLibraryX-library, .os-viewport, [data-testid="library-list"]
+) {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--srd-muted) transparent;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(
+  [role="grid"], [data-testid="library-list"]
+) {
+  box-sizing: border-box !important;
+  padding-bottom: var(--srd-space-3) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(
+  [role="row"], .main-yourLibraryX-listItem
+) {
+  min-height: 64px !important;
+  gap: var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(
+  .e-10451-image__container, .e-10451-image, [data-testid="cover-art-image"],
+  [data-testid="playlist-image"], .main-yourLibraryX-listItem img
+) {
+  box-sizing: border-box !important;
+  flex: 0 0 48px !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  object-fit: cover !important;
+  border-radius: var(--srd-radius-button) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(
+  .main-yourLibraryX-header, .main-yourLibraryX-headerContent
+) {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-sidebar :is(
+  .main-yourLibraryX-header, .main-yourLibraryX-headerContent
+) button {
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: var(--srd-radius-button) !important;
+}
+
+/* 7. Cover und Controls fließen in einer Karte. Kein absoluter Footer mit Leerraum. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone {
+  display: flex !important;
+  flex-direction: column !important;
+  align-self: start;
+  height: auto !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--srd-muted) transparent;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone::before,
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone::after,
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork::after {
+  display: none !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+  border-radius: var(--srd-radius-panel) var(--srd-radius-panel) 0 0;
+  -webkit-mask-image: linear-gradient(180deg, black 65%, transparent 100%);
+  mask-image: linear-gradient(180deg, black 65%, transparent 100%);
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork--empty img {
+  visibility: hidden;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork--empty {
+  display: none !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  padding: var(--srd-space-2) !important;
+  gap: var(--srd-space-2) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  [data-testid="now-playing-widget"], [data-testid="now-playing-header"]
+) {
+  align-items: center !important;
+  gap: var(--srd-space-1) !important;
+  min-width: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="now-playing-widget"] > :last-child:has(button) {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  [data-testid="general-controls"], [class*="nowPlayingBar-right"]
+) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap;
+  gap: var(--srd-space-1) !important;
+  opacity: 1 !important;
+  color: var(--srd-muted) !important;
+}
+
+/* Helle inaktive Symbole statt multiplizierter Opacity; Aktivzustand bleibt eindeutig. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]
+) {
+  opacity: 1 !important;
+  color: var(--srd-muted) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]
+):is([aria-checked="true"], [aria-checked="mixed"], [aria-pressed="true"], [data-active="true"]) {
+  color: var(--srd-readable-accent) !important;
+  border-color: currentColor !important;
+  background: color-mix(in srgb, var(--srd-secondary) 20%, var(--srd-surface)) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]
+):is(:disabled, [aria-disabled="true"]) {
+  opacity: 0.55 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  .playback-bar, :has(> [data-testid="playback-position"]),
+  .main-volumeBar-volumeBar, [data-testid="volume-bar"]
+) {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--srd-space-1) !important;
+  min-width: 0 !important;
+  min-height: 24px;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  :has(> [data-testid="playback-position"]) > :has([data-testid="playback-progressbar"]) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  [data-testid="playback-position"], [data-testid="playback-duration"]
+) {
+  flex: 0 0 auto;
+  width: auto !important;
+  color: var(--srd-muted) !important;
+  font-size: 11px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player :is(
+  .main-volumeBar-volumeBar, [data-testid="volume-bar"]
+) {
+  flex: 1 1 96px;
+  max-width: 128px;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player [data-testid="progress-bar-background"] {
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: rgb(184 194 209 / 30%) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player input[type="range"] {
+  margin: 0;
+  min-width: 0;
+  accent-color: var(--srd-readable-accent);
+}
+
+/* 8. Fokus bleibt sichtbar; Scrollbars passen auch auf älteren Chromium-Versionen. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player, .srd-left-sidebar, [data-testid="component-shelf"]
+) :is(button, a, [role="slider"]):focus-visible {
+  outline: 2px solid var(--srd-readable-accent) !important;
+  outline-offset: 2px;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-left-sidebar *, .srd-player-zone, [data-testid="component-shelf"] [data-testid="carousel-scroller"]
+)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-left-sidebar *, .srd-player-zone, [data-testid="component-shelf"] [data-testid="carousel-scroller"]
+)::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--srd-muted);
+}
+
+/* Kleine Fenster: Home-Shelves einspaltig, Player im normalen Fluss unter dem Inhalt. */
+@media (max-width: 1120px) {
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-grid {
+    grid-template-areas: "global-nav global-nav" "left-sidebar main-view" "now-playing-bar now-playing-bar" !important;
+    grid-template-columns: min(var(--srd-library-width, 220px), 30vw) minmax(0, 1fr) !important;
+    grid-template-rows: 64px minmax(0, 1fr) auto !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] > .contentSpacing {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding-inline: var(--srd-space-2) !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone {
+    width: 100%;
+    max-height: 40vh !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-artwork {
+    display: none !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+}
