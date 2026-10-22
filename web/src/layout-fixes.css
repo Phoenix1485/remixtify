@@ -623,6 +623,12 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
 }
 
 /* Neutralize Spotify's opaque card hover and carousel edge scrims. */
+/* Recent Spotify builds draw the black hover surface in ::after, above the
+   themed background. Keep its hit target/focus outline and clear only the fill. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"])::after {
+  background: transparent !important;
+}
+
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"]) {
   transition: transform 180ms cubic-bezier(0.2, 0.7, 0.25, 1), border-color 180ms ease, box-shadow 180ms ease !important;
 }

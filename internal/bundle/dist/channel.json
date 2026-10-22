@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "version": "0.2.2",
-  "publishedAt": "2026-10-22T12:09:18.062Z",
+  "publishedAt": "2026-10-22T12:11:49.852Z",
   "core": {
     "entry": "core.js",
-    "integrity": "sha384-7U3NY0qdoQOSJnW5YGtuA688m79XRxHHOpEgxYHD2HzQDyWc9qc3M1N1FALoEfsn"
+    "integrity": "sha384-f386NtFpW2GrzmUb5G0zZGmE7GBaUScPuTQuJ63Gsny0mmqq1eLJDXP8qpt9hmNf"
   },
   "packages": [
     {

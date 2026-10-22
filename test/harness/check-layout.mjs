@@ -54,6 +54,7 @@ try {
     await page.waitForTimeout(220);
     const hover = await card.evaluate(n => ({ bg: getComputedStyle(n).backgroundColor, transform: getComputedStyle(n).transform }));
     assert.notEqual(hover.bg, 'rgb(31, 31, 31)', 'hover must keep the glass surface');
+    assert.equal(await card.evaluate(n => getComputedStyle(n, '::after').backgroundColor), 'rgba(0, 0, 0, 0)', 'native hover pseudo-layer must not cover the glass with black');
     assert(hover.transform.includes('-2'), 'hover should lift the card gently');
     await page.locator('.transport-side').first().evaluate(node => {
       const extra = document.createElement('button'); extra.ariaLabel = 'Seek backward'; extra.textContent = '15'; node.appendChild(extra);
