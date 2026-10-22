@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -267,10 +268,11 @@ func (m Manager) installRuntime(xpuiDir string, marker Marker) error {
 	}
 
 	config := struct {
-		ChannelURL      string `json:"channelUrl,omitempty"`
-		LocalChannelURL string `json:"localChannelUrl"`
-		AutoUpdate      bool   `json:"autoUpdate"`
-	}{m.ChannelURL, "redesign/channel.json", m.AutoUpdate}
+		ChannelURL            string `json:"channelUrl,omitempty"`
+		LocalChannelURL       string `json:"localChannelUrl"`
+		AutoUpdate            bool   `json:"autoUpdate"`
+		DesktopWindowControls bool   `json:"desktopWindowControls"`
+	}{m.ChannelURL, "redesign/channel.json", m.AutoUpdate, runtime.GOOS == "windows"}
 	raw, err := json.Marshal(config)
 	if err != nil {
 		return err
@@ -297,11 +299,23 @@ func (m Manager) installRuntime(xpuiDir string, marker Marker) error {
 }
 
 func writeUpdateStatus(stateDir, runtimeDir string) error {
+	if bridge, readErr := os.ReadFile(filepath.Join(stateDir, "desktop-control.json")); readErr == nil {
+		var descriptor any
+		if json.Unmarshal(bridge, &descriptor) == nil {
+			if err := updater.WriteJSON(filepath.Join(runtimeDir, "desktop-control.json"), descriptor); err != nil {
+				return err
+			}
+		}
+	}
 	status := struct {
-		Ready    bool             `json:"ready"`
-		Version  string           `json:"version,omitempty"`
-		Progress updater.Progress `json:"progress"`
+		Ready            bool             `json:"ready"`
+		Version          string           `json:"version,omitempty"`
+		InstalledVersion string           `json:"installedVersion,omitempty"`
+		Progress         updater.Progress `json:"progress"`
 	}{}
+	if current, readErr := os.ReadFile(filepath.Join(stateDir, "current.txt")); readErr == nil {
+		status.InstalledVersion = strings.TrimSpace(string(current))
+	}
 	progress, err := updater.ReadProgress(stateDir)
 	if err != nil {
 		return err

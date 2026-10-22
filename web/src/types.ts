@@ -88,6 +88,7 @@ declare global {
       channelUrl?: string;
       localChannelUrl: string;
       autoUpdate: boolean;
+      desktopWindowControls?: boolean;
     };
     __SpotifyRedesignBootstrap?: {
       channel: UpdateChannel;

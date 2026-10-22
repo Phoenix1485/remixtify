@@ -94,6 +94,7 @@
           const status = await fetchUpdateStatus(statusUrl);
           updateProgress = status.progress;
           updateReady = status.ready && status.version === (remoteChannel.cli?.version || remoteChannel.version);
+          if (status.installedVersion === (remoteChannel.cli?.version || remoteChannel.version)) availableUpdate = void 0;
         }
       } catch (error) {
         console.warn("[Remixify] Remote update check unavailable.", error);
@@ -120,6 +121,7 @@
             availableUpdate = remoteChannel.version !== localChannel.version ? remoteChannel : void 0;
           }
           const status = await fetchUpdateStatus(statusUrl);
+          if (availableUpdate && status.installedVersion === (availableUpdate.cli?.version || availableUpdate.version)) availableUpdate = void 0;
           const notice = {
             update: availableUpdate,
             ready: Boolean(availableUpdate) && status.ready && status.version === (availableUpdate?.cli?.version || availableUpdate?.version),

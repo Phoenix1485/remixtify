@@ -1,5 +1,9 @@
 import styles from "./core.css";
 import layoutFixes from "./layout-fixes.css";
+import desktopStyles from "./desktop.css";
+import { syncDesktopChrome, syncCustomIcons } from "./desktop-chrome";
+import { syncPlaybackPanel } from "./playback-panel";
+import { desktopAction } from "./desktop-client";
 import type {
   PackageDefinition,
   PackageLifecycle,
@@ -329,6 +333,8 @@ function applyThemeState(settings: RuntimeSettings): void {
   root.dataset.srdSpotlight = settings.showSpotlight ? "on" : "off";
   applyWallpaper(settings);
   applyThemeStylesheet(settings);
+  syncDesktopChrome();
+  syncCustomIcons();
 }
 
 function syncSidebarLayout(shell: HTMLElement, sidebar: HTMLElement): void {
@@ -367,6 +373,7 @@ function syncPlayerArtwork(playerZone: HTMLElement, player: HTMLElement): void {
 }
 
 function labelWindowControls(): void {
+  if (syncDesktopChrome()) return;
   const parents = new Set<HTMLElement>();
   document.querySelectorAll<HTMLElement>('[data-testid="window-controls"]').forEach((node) => parents.add(node));
   for (const node of document.querySelectorAll<HTMLElement>('button, [role="button"]')) {
@@ -464,13 +471,20 @@ function labelSpotifyShell(): boolean {
       child.matches('[data-testid="now-playing-bar"]') || Boolean(child.querySelector('[data-testid="now-playing-bar"]'));
     child.classList.toggle("srd-right-sidebar", isRightSidebar);
     child.classList.toggle("srd-player-zone", isPlayerZone);
+    // Native drag overlays still reference the removed right-sidebar column.
+    // Constrain their column span so CSS Grid cannot create an extra gap at right.
+    child.classList.toggle("srd-shell-overlay", !isRightSidebar && (child.classList.contains("srd-shell-overlay") || gridArea.includes("right-sidebar")));
     if (isPlayerZone) playerZone = child;
   }
   const player = document.querySelector<HTMLElement>('[data-testid="now-playing-bar"]');
   player?.classList.add("srd-player");
-  if (playerZone && player) syncPlayerArtwork(playerZone, player);
+  if (playerZone && player) {
+    syncPlayerArtwork(playerZone, player);
+    syncPlaybackPanel(playerZone, player);
+  }
   labelWindowControls();
   labelSearchLayers();
+  syncCustomIcons();
   return true;
 }
 
@@ -483,13 +497,18 @@ function mountStructureObserver(): void {
   let sidebarFrame: number | undefined;
   let sidebarObserver: MutationObserver | undefined;
   let observedSidebar: HTMLElement | undefined;
+  let observedShell: HTMLElement | undefined;
+  let shellClassObserver: MutationObserver | undefined;
+  let shellResizeObserver: ResizeObserver | undefined;
   const syncShell = () => {
     if (shellFrame !== undefined) return;
-    shellFrame = window.requestAnimationFrame(() => {
+    // CEF suspends animation frames when Spotify is occluded. A DOM refresh
+    // must still complete while an update opens behind another window.
+    shellFrame = window.setTimeout(() => {
       shellFrame = undefined;
       labelSpotifyShell();
       observeSidebarWidth();
-    });
+    }, 16);
   };
   const schedule = () => {
     syncShell();
@@ -516,6 +535,16 @@ function mountStructureObserver(): void {
     window.requestAnimationFrame(follow);
   };
   const observeSidebarWidth = () => {
+    const shell = document.querySelector<HTMLElement>("#main-view")?.parentElement;
+    if (shell && shell !== observedShell) {
+      shellClassObserver?.disconnect();
+      shellResizeObserver?.disconnect();
+      observedShell = shell;
+      shellClassObserver = new MutationObserver(() => { if (!shell.classList.contains("srd-app-grid")) syncShell(); });
+      shellClassObserver.observe(shell, { attributes: true, attributeFilter: ["class"] });
+      shellResizeObserver = new ResizeObserver(syncShell);
+      shellResizeObserver.observe(shell);
+    }
     const sidebar = document.querySelector<HTMLElement>("#Desktop_LeftSidebar_Id") || undefined;
     if (sidebar === observedSidebar) return;
     sidebarObserver?.disconnect();
@@ -705,7 +734,7 @@ function injectCoreStyle(): void {
   if (document.getElementById(STYLE_ID)) return;
   const style = element("style");
   style.id = STYLE_ID;
-  style.textContent = `${styles}\n${layoutFixes}`;
+  style.textContent = `${styles}\n${layoutFixes}\n${desktopStyles}`;
   document.head.appendChild(style);
 }
 
@@ -1452,16 +1481,20 @@ function createSettingsModal(manager: PackageManager, channel: UpdateChannel, us
 }
 
 function openUpdaterAction(action: "update-now" | "download-update"): void {
-  const link = document.createElement("a");
-  link.href = `remixify://${action}`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  void desktopAction(action).catch(error => {
+    console.warn("[Remixify] Desktop updater connection is unavailable", error);
+  });
+}
+
+function matchingUpdateProgress(notice: UpdateNotice): UpdateNotice["progress"] {
+  const progress = notice.progress;
+  const version = notice.update?.cli?.version || notice.update?.version;
+  return progress?.version && version && progress.version !== version ? undefined : progress;
 }
 
 function updateProgressText(notice: UpdateNotice): string {
-  const progress = notice.progress;
-  if (!progress) return notice.ready ? "Downloaded and verified — ready to install" : "Waiting for the updater…";
+  const progress = matchingUpdateProgress(notice);
+  if (!progress) return notice.ready ? "Downloaded and verified — ready to install" : "Update available. Start the download when you are ready.";
   if (progress.stage === "downloading") {
     const bytes = progress.bytes || 0;
     const total = progress.totalBytes || 0;
@@ -1513,28 +1546,31 @@ function createUpdateConfirmation(update: UpdateChannel, initial: UpdateNotice =
   let acknowledgement: number | undefined;
   const renderProgress = () => {
     statusLabel.textContent = updateProgressText(notice);
-    const progress = notice.progress;
+    const progress = matchingUpdateProgress(notice);
+    const complete = progress?.stage === "complete";
+    const downloading = Boolean(progress && ["checking", "downloading", "verifying"].includes(progress.stage));
     if (progress?.stage === "downloading" && (progress.totalBytes || 0) > 0) bar.value = Math.min(100, (progress.bytes || 0) / progress.totalBytes! * 100);
     else if (progress?.stage === "complete") bar.value = 100;
     else if (progress?.steps) bar.value = Math.max(0, ((progress.step || 1) - 1) / progress.steps * 100);
     else if (notice.ready && !busy) bar.value = 100;
     else bar.removeAttribute("value");
     statusView.classList.toggle("srd-update-status--error", progress?.stage === "error");
-    title.textContent = busy ? "Installing update" : notice.ready ? "Install update?" : "Downloading update";
-    install.disabled = busy || (!notice.ready && progress?.stage !== "error");
-    install.textContent = busy ? "Installing…" : notice.ready ? "Update now" : progress?.stage === "error" ? "Retry download" : "Downloading…";
+    title.textContent = complete ? "Update complete" : busy ? "Starting updater" : notice.ready ? "Install update?" : downloading ? "Downloading update" : "Update available";
+    copy.textContent = complete ? `Version ${update.version} is installed.` : notice.ready ? `Version ${update.version} is ready. Spotify will close and reopen to install it.` : downloading ? `Version ${update.version} is downloading. You can install it once verification finishes.` : `Version ${update.version} is available to download.`;
+    install.disabled = busy || downloading;
+    install.textContent = complete ? "Done" : busy ? "Starting…" : notice.ready ? "Update now" : progress?.stage === "error" ? "Retry download" : downloading ? "Downloading…" : "Download update";
     cancel.textContent = busy ? "Hide" : "Not now";
   };
   const onProgress = (event: Event) => {
     const next = (event as CustomEvent<UpdateNotice>).detail;
-    if (next.update?.version !== update.version) return;
-    const progress = next.progress;
+    if (next.update?.version !== update.version && !(next.progress?.stage === "complete" && next.progress.version === (update.cli?.version || update.version))) return;
+    const progress = matchingUpdateProgress({ ...next, update });
     if (requestedAt && (!progress || progress.updatedAt < requestedAt)) return;
     if (requestedAt && progress && progress.updatedAt >= requestedAt && ["checking", "downloading", "verifying", "ready", "starting", "stopping", "installing", "restarting", "complete", "error"].includes(progress.stage)) {
       window.clearTimeout(acknowledgement);
       if (progress.stage === "error") busy = false;
     }
-    notice = next;
+    notice = { ...next, update, progress };
     if (progress && ["checking", "downloading", "verifying", "ready", "complete", "error"].includes(progress.stage)) busy = false;
     renderProgress();
   };
@@ -1550,6 +1586,7 @@ function createUpdateConfirmation(update: UpdateChannel, initial: UpdateNotice =
     if (event.target === backdrop) dismiss();
   });
   install.addEventListener("click", () => {
+    if (matchingUpdateProgress(notice)?.stage === "complete") { dismiss(); return; }
     requestedAt = Date.now();
     const downloading = !notice.ready;
     busy = true;
@@ -1598,12 +1635,10 @@ function createDeactivateConfirmation(): HTMLElement {
   deactivate.addEventListener("click", () => {
     deactivate.disabled = true;
     deactivate.textContent = "Deactivating\u2026";
-    const action = document.createElement("a");
-    action.href = "remixify://deactivate";
-    action.hidden = true;
-    document.body.appendChild(action);
-    action.click();
-    action.remove();
+    void desktopAction("deactivate").catch(() => {
+      deactivate.disabled = false;
+      deactivate.textContent = "Connection failed — retry";
+    });
   });
   return backdrop;
 }
@@ -1636,11 +1671,13 @@ function mountTopbarControls(
     host.querySelector(".srd-update-button")?.remove();
     const update = notice.update;
     if (!update) return;
-    const progress = notice.progress;
+    const progress = matchingUpdateProgress(notice);
+    if (progress?.stage === "complete") return;
     const percent = progress?.stage === "downloading" && (progress.totalBytes || 0) > 0
       ? ` ${Math.min(100, Math.floor((progress.bytes || 0) / progress.totalBytes! * 100))}%` : "";
     const failed = progress?.stage === "error";
-    const label = notice.ready ? "Update" : failed ? "Update failed" : autoDownload ? `Downloading${percent}…` : "Download available";
+    const downloading = Boolean(progress && ["checking", "downloading", "verifying"].includes(progress.stage));
+    const label = notice.ready ? "Update" : failed ? "Update failed" : downloading ? `Downloading${percent}…` : "Update available";
     const updateButton = element("button", "srd-update-button", label);
     updateButton.type = "button";
     updateButton.title = notice.ready
@@ -1651,7 +1688,6 @@ function mountTopbarControls(
       if (!notice.ready) {
         document.querySelector(".srd-backdrop")?.remove();
         document.body.appendChild(createUpdateConfirmation(update, notice));
-        if (!autoDownload || failed) openUpdaterAction("download-update");
         return;
       }
       document.querySelector(".srd-backdrop")?.remove();

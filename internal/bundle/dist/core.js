@@ -4309,6 +4309,787 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
 }
 `;
 
+  // web/src/desktop.css
+  var desktop_default = `/* Desktop chrome: one outer gutter, custom SVGs, separate button hit targets. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-grid {
+  padding: 16px !important;
+  gap: 16px !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-shell-overlay { grid-column: 1 / -1 !important; }
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-caption="custom"] body .srd-global-nav {
+  --srd-caption-width: 136px;
+  margin-inline-start: 64px !important;
+  margin-inline-end: 152px !important;
+  height: 64px !important;
+}
+
+.srd-custom-caption, .srd-custom-menu, .srd-desktop-menu, .srd-queue-panel { display: none; }
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(.srd-custom-caption, .srd-custom-menu) {
+  position: fixed;
+  top: 16px;
+  height: 64px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-app-region: no-drag;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-custom-caption { right: 16px; width: 136px; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-custom-menu { left: 16px; width: 48px; }
+
+/* Remove the old decorative slabs, including the Windows fallback. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(.srd-native-caption-frame, .srd-native-menu-frame) { display: none !important; }
+
+.srd-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(230 241 255 / 18%);
+  border-radius: 10px;
+  background: rgb(230 241 255 / 7%);
+  color: var(--srd-text, #f4f7fc);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.srd-icon-button:hover { background: color-mix(in srgb, var(--srd-secondary) 22%, rgb(230 241 255 / 10%)); border-color: var(--srd-readable-accent); }
+.srd-icon-button:active { transform: scale(.94); }
+.srd-icon-button:focus-visible, .srd-queue-track:focus-visible { outline: 2px solid var(--srd-readable-accent); outline-offset: 2px; }
+.srd-icon-button:disabled { opacity: .4; cursor: default; transform: none; }
+.srd-custom-caption [data-srd-window-action="minimize"] { color: var(--srd-readable-accent); }
+.srd-custom-caption [data-srd-window-action="close"]:hover { background: #df5364; border-color: #ffb9c2; color: white; }
+
+.srd-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 20px !important;
+  width: 20px !important;
+  min-width: 0 !important;
+  height: 20px !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+.srd-icon svg { width: 20px !important; height: 20px !important; margin: 0 !important; }
+body button[data-srd-icon]:not(.srd-settings-button) > .srd-icon { display: none !important; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body button[data-srd-icon] > .srd-icon { display: inline-flex !important; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-icon :is(svg, path, rect, circle, ellipse),
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(.srd-global-nav, .srd-player) button[data-srd-icon] > .srd-icon :is(svg, path, rect, circle, ellipse) {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-icon[data-icon="play"] path,
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player button[data-srd-icon="play"] > .srd-icon path { fill: currentColor !important; stroke: none !important; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-icon:is([data-icon="menu"], [data-icon="grip"]) circle { fill: currentColor !important; stroke: none !important; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body button[data-srd-icon] > :not(.srd-icon) { display: none !important; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body button[data-srd-icon] { display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-desktop-menu {
+  position: fixed;
+  left: 16px;
+  top: 88px;
+  z-index: 1300;
+  display: grid;
+  gap: 4px;
+  min-width: 224px;
+  padding: 8px;
+  border: 1px solid var(--srd-glass-border);
+  border-radius: 16px;
+  background: var(--srd-glass-fill);
+  backdrop-filter: blur(var(--srd-glass-blur)) saturate(1.3);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 24%);
+}
+
+.srd-desktop-menu .srd-icon-button { justify-content: flex-start; width: 100%; padding-inline: 12px; border-color: transparent; background: transparent; }
+
+/* Player and queue are separate glass surfaces; keep Spotify's DOM in place. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone:has(.srd-queue-panel) {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  isolation: isolate;
+  gap: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone:has(.srd-queue-panel)::before {
+  content: "";
+  display: block !important;
+  position: absolute !important;
+  inset: 0 0 auto !important;
+  height: var(--srd-now-playing-height, 640px) !important;
+  z-index: -1 !important;
+  opacity: 1 !important;
+  border: 1px solid var(--srd-glass-border) !important;
+  border-radius: 16px !important;
+  background: var(--srd-glass-fill) !important;
+  filter: none !important;
+  backdrop-filter: blur(var(--srd-glass-blur)) saturate(1.3) !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-queue-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  height: clamp(180px, calc(100dvh - var(--srd-now-playing-height, 640px) - 128px), 400px);
+  min-height: 180px;
+  min-width: 0;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--srd-glass-border);
+  border-radius: 16px;
+  background: var(--srd-glass-fill);
+  backdrop-filter: blur(var(--srd-glass-blur)) saturate(1.3);
+  box-shadow: inset 0 1px rgb(255 255 255 / 12%);
+  color: var(--srd-text);
+}
+
+.srd-queue-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; flex-shrink: 0; }
+.srd-queue-tabs .srd-icon-button { width: 100%; font-size: 13px; font-weight: 650; }
+.srd-queue-tabs [aria-selected="true"] { color: var(--srd-readable-accent); background: color-mix(in srgb, var(--srd-secondary) 17%, transparent); border-color: color-mix(in srgb, var(--srd-secondary) 55%, white); }
+.srd-queue-hint { margin: 10px 2px 8px; color: var(--srd-muted); font-size: 11px; line-height: 1.5; flex-shrink: 0; }
+.srd-queue-list { flex: 1 1 auto; min-height: 0; min-width: 0; margin: 0; padding: 2px 4px 8px 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--srd-readable-accent) transparent; list-style: none; }
+.srd-queue-list::-webkit-scrollbar { width: 5px; }
+.srd-queue-list::-webkit-scrollbar-thumb { background: var(--srd-readable-accent); border-radius: 8px; }
+.srd-queue-row { display: flex; position: relative; align-items: center; min-width: 0; gap: 4px; margin: 0 0 4px; padding: 4px; border: 1px solid transparent; border-radius: 10px; }
+.srd-queue-row:hover, .srd-queue-row:focus-within { background: rgb(240 247 255 / 7%); border-color: rgb(240 247 255 / 12%); }
+.srd-queue-row--dragging { opacity: .45; }
+.srd-queue-row[data-drop]::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px; background: var(--srd-readable-accent); box-shadow: 0 0 8px color-mix(in srgb, var(--srd-secondary) 55%, transparent); }
+.srd-queue-row[data-drop="before"]::after { top: -3px; }
+.srd-queue-row[data-drop="after"]::after { bottom: -3px; }
+.srd-queue-track { display: flex; align-items: center; flex: 1 1 0; min-width: 0; gap: 10px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--srd-text); text-align: left; cursor: pointer; font: inherit; }
+.srd-queue-track:disabled { cursor: progress; }
+.srd-queue-artwork { display: grid; place-items: center; position: relative; flex: 0 0 38px; width: 38px; height: 38px; overflow: hidden; border-radius: 8px; background: linear-gradient(135deg, color-mix(in srgb, var(--srd-primary) 30%, transparent), color-mix(in srgb, var(--srd-secondary) 24%, transparent)); color: var(--srd-muted); }
+.srd-queue-artwork img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.srd-queue-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.srd-queue-name, .srd-queue-artists { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.4; }
+.srd-queue-name { color: var(--srd-text); font-size: 12px; font-weight: 650; }
+.srd-queue-artists { color: var(--srd-muted); font-size: 11px; }
+.srd-queue-moves { display: flex; flex-direction: column; flex: 0 0 20px; }
+.srd-queue-moves .srd-icon-button { width: 20px; height: 20px; border: 0; background: transparent; }
+.srd-queue-moves .srd-icon, .srd-queue-drag .srd-icon { flex-basis: 16px !important; width: 16px !important; height: 16px !important; }
+.srd-queue-drag { width: 24px; height: 36px; border: 0; background: transparent; cursor: grab; color: var(--srd-muted); }
+.srd-queue-drag:active { cursor: grabbing; }
+.srd-queue-status { margin: 4px 2px 0; color: var(--srd-readable-accent); font-size: 11px; line-height: 1.4; flex-shrink: 0; overflow-wrap: anywhere; }
+.srd-queue-status:empty { display: none; }
+.srd-queue-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 8px; text-align: center; color: var(--srd-muted); font-size: 12px; }
+
+@media (max-width: 1120px) {
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-queue-panel { height: 240px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .srd-icon-button { transition: none; transform: none; }
+}
+`;
+
+  // web/src/spotify-bridge.ts
+  var cached;
+  function fromRegistry(value) {
+    if (!value || typeof value.resolveNoThrow !== "function") return;
+    const registry = value;
+    try {
+      const player = registry.resolveNoThrow(Symbol.for("PlayerAPI"));
+      if (typeof player?.getQueue !== "function" || typeof player.reorderQueue !== "function") return;
+      return {
+        player,
+        history: registry.resolveNoThrow(Symbol.for("PlayHistoryAPI")),
+        native: registry.resolveNoThrow(Symbol.for("NativeAPI"))
+      };
+    } catch {
+      return;
+    }
+  }
+  function desktopServices() {
+    if (cached) return cached;
+    const host = document.querySelector("#main-view") || document.querySelector(".Root");
+    if (!host) return;
+    const key = Object.keys(host).find((key2) => key2.startsWith("__reactFiber$"));
+    if (!key) return;
+    let fiber = host[key];
+    while (fiber?.return) fiber = fiber.return;
+    const pending2 = [fiber];
+    for (let visited = 0; pending2.length && visited < 2e4; visited++) {
+      const node = pending2.pop();
+      if (!node) continue;
+      for (let dependency = node.dependencies?.firstContext; dependency; dependency = dependency.next) {
+        const services2 = fromRegistry(dependency.memoizedValue);
+        if (services2) return cached = services2;
+      }
+      const services = fromRegistry(node.memoizedProps?.value);
+      if (services) return cached = services;
+      if (node.sibling) pending2.push(node.sibling);
+      if (node.child) pending2.push(node.child);
+    }
+  }
+
+  // web/src/icons.ts
+  var paths = {
+    minimize: '<path d="M5 12h14"/>',
+    maximize: '<rect x="5" y="5" width="14" height="14" rx="3"/>',
+    restore: '<path d="M9 5h8a2 2 0 0 1 2 2v8"/><rect x="5" y="9" width="10" height="10" rx="2"/>',
+    close: '<path d="m6 6 12 12M18 6 6 18"/>',
+    menu: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+    back: '<path d="m14 5-7 7 7 7"/>',
+    forward: '<path d="m10 5 7 7-7 7"/>',
+    home: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/>',
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+    settings: '<path d="m9 3-.6 3-2.8 1-2.6-1.5-2 3.5 2.3 2v2L1 15l2 3.5L5.6 17l2.8 1L9 21h4l.6-3 2.8-1 2.6 1.5 2-3.5-2.3-2v-2L21 9l-2-3.5L16.4 7l-2.8-1L13 3z"/><circle cx="11" cy="12" r="3"/>',
+    bell: '<path d="M5 16h14l-2-3V9a5 5 0 0 0-10 0v4zM10 20h4"/>',
+    friends: '<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6m1 3a5 5 0 0 1 3 4v2"/>',
+    browse: '<path d="M4 8h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM3 4h18M9 12h6"/>',
+    play: '<path d="m8 5 11 7-11 7z"/>',
+    pause: '<path d="M8 5v14M16 5v14"/>',
+    previous: '<path d="M5 5v14m14-1L8 12l11-6z"/>',
+    next: '<path d="M19 5v14M5 18l11-6L5 6z"/>',
+    shuffle: '<path d="M3 6h2c5 0 9 12 14 12h2m-4-4 4 4-4 4M3 18h2c2 0 4-3 6-6m3-4 3-2h4m-4-4 4 4-4 4"/>',
+    repeat: '<path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4m14-1v2a3 3 0 0 1-3 3H3"/>',
+    history: '<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7m2-4v5l3 2"/>',
+    queue: '<path d="M4 5h13M4 11h13M4 17h7m5-2 5 3-5 3z"/>',
+    grip: '<circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/>',
+    up: '<path d="m5 14 7-7 7 7"/>',
+    down: '<path d="m5 10 7 7 7-7"/>',
+    music: '<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="17" cy="16" rx="3" ry="3"/>',
+    volume: '<path d="M3 9h4l5-5v16l-5-5H3zM16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+    muted: '<path d="M3 9h4l5-5v16l-5-5H3zM17 9l5 6m0-6-5 6"/>',
+    lyrics: '<path d="m5 19 7-7m-1-7 1-1a4 4 0 0 1 6 6l-1 1zM3 21h6"/>',
+    device: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M9 21h6m-3-4v4"/>',
+    fullscreen: '<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>'
+  };
+  function icon(name) {
+    const span = document.createElement("span");
+    span.className = "srd-icon";
+    span.dataset.icon = name;
+    span.ariaHidden = "true";
+    span.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[name]}</svg>`;
+    return span;
+  }
+  function iconButton(name, label) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "srd-icon-button";
+    button.ariaLabel = button.title = label;
+    button.append(icon(name));
+    return button;
+  }
+
+  // web/src/desktop-client.ts
+  var connection;
+  var pending;
+  var checkedAt = 0;
+  function desktopConnected() {
+    return Boolean(connection);
+  }
+  function connectDesktop() {
+    if (pending) return pending;
+    if (Date.now() - checkedAt < 4e3) return Promise.resolve(Boolean(connection));
+    pending = (async () => {
+      const previous = Boolean(connection);
+      try {
+        const channel = window.__SpotifyRedesignBootstrap?.channelUrl || new URL(window.__SpotifyRedesignConfig?.localChannelUrl || "redesign/channel.json", document.baseURI).href;
+        const url = new URL("desktop-control.json", channel);
+        url.searchParams.set("t", String(Date.now()));
+        const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(1500) });
+        if (!response.ok) throw Error("Desktop connection is unavailable");
+        const descriptor = await response.json();
+        const endpoint = new URL(descriptor.url);
+        if (endpoint.protocol !== "http:" || endpoint.hostname !== "127.0.0.1" || !/^[a-f0-9]{64}$/.test(descriptor.token)) throw Error("Invalid desktop connection");
+        const health = await fetch(`${descriptor.url}/status`, { headers: { "X-Remixify-Token": descriptor.token }, signal: AbortSignal.timeout(1500) });
+        if (!health.ok) throw Error("Desktop connection is unavailable");
+        connection = descriptor;
+      } catch {
+        connection = void 0;
+      } finally {
+        checkedAt = Date.now();
+        pending = void 0;
+        if (previous !== Boolean(connection)) window.dispatchEvent(new Event("spotify-redesign:desktop-connected"));
+      }
+      return Boolean(connection);
+    })();
+    return pending;
+  }
+  async function desktopAction(action) {
+    if (!await connectDesktop() || !connection) throw Error("Restart Remixify to reconnect the desktop controls.");
+    const response = await fetch(`${connection.url}/action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Remixify-Token": connection.token },
+      body: JSON.stringify({ action }),
+      signal: AbortSignal.timeout(5e3)
+    });
+    if (!response.ok) throw Error((await response.text()).trim() || "Desktop action failed");
+  }
+  window.setInterval(() => {
+    if (!document.hidden) void connectDesktop();
+  }, 5e3);
+
+  // web/src/desktop-chrome.ts
+  var hiddenNative = false;
+  var changingNative = false;
+  var menu;
+  var dismissMenu;
+  function active() {
+    return document.documentElement.matches('.srd-theme-active[data-srd-layout="studio"]');
+  }
+  function dispatchWindowAction(action) {
+    void desktopAction(`window-${action}`).catch((error) => {
+      console.warn("[Remixify] Window action failed", error);
+      void desktopServices()?.native?.setWindowButtonsVisibility(true);
+      hiddenNative = false;
+      document.getElementById("srd-custom-caption")?.remove();
+    });
+  }
+  function showMenu(button) {
+    if (menu) {
+      dismissMenu?.();
+      return;
+    }
+    menu = document.createElement("div");
+    menu.className = "srd-desktop-menu";
+    menu.setAttribute("role", "menu");
+    const close = () => {
+      menu?.remove();
+      menu = void 0;
+      dismissMenu = void 0;
+      document.removeEventListener("pointerdown", outside, true);
+      button.ariaExpanded = "false";
+      button.focus();
+    };
+    dismissMenu = close;
+    const actions = [
+      ["back", "Go back", () => document.querySelector('[data-testid="global-nav-bar"] button[aria-label="Go back"], [data-testid="global-nav-bar"] button[aria-label="Back"]')?.click()],
+      ["forward", "Go forward", () => document.querySelector('[data-testid="global-nav-bar"] button[aria-label="Go forward"], [data-testid="global-nav-bar"] button[aria-label="Forward"]')?.click()],
+      ["history", "Song history", () => document.querySelector("#srd-history-tab")?.click()],
+      ["queue", "Up next", () => document.querySelector("#srd-queue-tab")?.click()],
+      ["settings", "Remixify settings", () => window.SpotifyRedesign?.openSettings()]
+    ];
+    for (const [name, label, action] of actions) {
+      const item = iconButton(name, label);
+      item.setAttribute("role", "menuitem");
+      item.append(document.createTextNode(label));
+      item.addEventListener("click", () => {
+        close();
+        action();
+      });
+      menu.append(item);
+    }
+    menu.addEventListener("keydown", (event) => {
+      const items = [...menu.querySelectorAll("button")];
+      const index = items.indexOf(document.activeElement);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+      }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        items[(index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus();
+      }
+    });
+    document.body.append(menu);
+    button.ariaExpanded = "true";
+    menu.querySelector("button")?.focus();
+    const outside = (event) => {
+      if (menu?.contains(event.target) || button.contains(event.target)) return;
+      close();
+      document.removeEventListener("pointerdown", outside, true);
+    };
+    document.addEventListener("pointerdown", outside, true);
+  }
+  function syncDesktopChrome() {
+    const services = desktopServices();
+    const nativeSupported = Boolean(window.__SpotifyRedesignConfig?.desktopWindowControls && services?.native);
+    if (nativeSupported && !desktopConnected()) void connectDesktop();
+    const supported = nativeSupported && desktopConnected();
+    const enabled = supported && active();
+    if (nativeSupported && enabled !== hiddenNative && !changingNative) {
+      changingNative = true;
+      void services.native.setWindowButtonsVisibility(!enabled).then(() => {
+        hiddenNative = enabled;
+        changingNative = false;
+        syncDesktopChrome();
+      }).catch((error) => {
+        changingNative = false;
+        console.warn("[Remixify] Native title bar is still available", error);
+      });
+    }
+    if (!enabled || !hiddenNative) {
+      document.getElementById("srd-custom-caption")?.remove();
+      document.getElementById("srd-custom-menu")?.remove();
+      if (!enabled) dismissMenu?.();
+      return false;
+    }
+    document.documentElement.dataset.srdCaption = "custom";
+    document.querySelectorAll(".srd-native-caption-frame, .srd-native-menu-frame").forEach((n) => n.remove());
+    if (!document.getElementById("srd-custom-caption")) {
+      const controls = document.createElement("div");
+      controls.id = "srd-custom-caption";
+      controls.className = "srd-custom-caption";
+      controls.setAttribute("role", "group");
+      controls.ariaLabel = "Window controls";
+      for (const [action, label] of [["minimize", "Minimize"], ["maximize", "Maximize or restore"], ["close", "Close window"]]) {
+        const button2 = iconButton(action, label);
+        button2.dataset.srdWindowAction = action;
+        button2.addEventListener("click", () => dispatchWindowAction(action));
+        controls.append(button2);
+      }
+      document.body.append(controls);
+      const menuHost = document.createElement("div");
+      menuHost.id = "srd-custom-menu";
+      menuHost.className = "srd-custom-menu";
+      const button = iconButton("menu", "Main menu");
+      button.ariaHasPopup = "menu";
+      button.ariaExpanded = "false";
+      button.addEventListener("click", () => showMenu(button));
+      menuHost.append(button);
+      document.body.append(menuHost);
+    }
+    return true;
+  }
+  window.addEventListener("spotify-redesign:desktop-connected", () => syncDesktopChrome());
+  function syncCustomIcons() {
+    const targets = document.querySelectorAll(".srd-global-nav button, .srd-player button");
+    for (const button of targets) {
+      if (button.closest(".srd-backdrop")) continue;
+      const test = button.dataset.testid || "";
+      const label = (button.ariaLabel || button.title || "").toLowerCase();
+      let name;
+      if (button.classList.contains("srd-settings-button")) name = "settings";
+      else if (test === "control-button-playpause") name = label.includes("pause") ? "pause" : "play";
+      else if (test.includes("shuffle") || label.includes("shuffle")) name = "shuffle";
+      else if (test.includes("repeat")) name = "repeat";
+      else if (test === "control-button-skip-back" || /^(previous|previous track)$/.test(label)) name = "previous";
+      else if (test === "control-button-skip-forward" || /^(next|next track)$/.test(label)) name = "next";
+      else if (/^(go )?back$/.test(label)) name = "back";
+      else if (/^(go )?forward$/.test(label)) name = "forward";
+      else if (label === "home") name = "home";
+      else if (label.includes("notification")) name = "bell";
+      else if (label.includes("friend")) name = "friends";
+      else if (label === "search") name = "search";
+      else if (label === "browse") name = "browse";
+      else if (label.includes("queue")) name = "queue";
+      else if (label.includes("lyrics")) name = "lyrics";
+      else if (label.includes("unmute")) name = "muted";
+      else if (label === "mute" || label.includes("mute volume")) name = "volume";
+      else if (label.includes("connect to a device") || label.includes("now playing view")) name = "device";
+      else if (test === "pip-toggle-button") name = "device";
+      else if (label.includes("full screen") || label.includes("fullscreen")) name = "fullscreen";
+      if (!name || button.dataset.srdIcon === name) continue;
+      button.dataset.srdIcon = name;
+      button.querySelector(":scope > .srd-icon")?.remove();
+      if (button.classList.contains("srd-settings-button")) button.replaceChildren(icon(name));
+      else button.append(icon(name));
+    }
+  }
+
+  // web/src/playback-panel.ts
+  var reference = (track) => ({ uri: track.uri, uid: track.uid });
+  var identity = (track) => `${track.uri}:${track.uid || ""}`;
+  var playable = (track) => /^spotify:(track|episode|local):/.test(track.uri);
+  var text = (tag, className, value) => {
+    const node = document.createElement(tag);
+    node.className = className;
+    node.textContent = value;
+    return node;
+  };
+  var PlaybackPanel = class {
+    root = document.createElement("section");
+    tabs = document.createElement("div");
+    list = document.createElement("ol");
+    status = text("p", "srd-queue-status", "Connecting to Spotify\u2026");
+    hint = text("p", "srd-queue-hint", "Drag the handle to change what plays next.");
+    tab = "queue";
+    services;
+    items = [];
+    histories = [];
+    signature = "";
+    busy = false;
+    refreshing = false;
+    dragging;
+    unsubscribes = [];
+    lastHistory = 0;
+    actionError = "";
+    restoreFocus;
+    constructor() {
+      this.root.id = "srd-playback-panel";
+      this.root.className = "srd-queue-panel";
+      this.root.ariaLabel = "Playback history and upcoming songs";
+      this.tabs.className = "srd-queue-tabs";
+      this.tabs.setAttribute("role", "tablist");
+      for (const tab of ["history", "queue"]) {
+        const button = iconButton(tab, tab === "history" ? "Song history" : "Up next");
+        button.id = `srd-${tab}-tab`;
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-controls", "srd-playback-list");
+        button.append(document.createTextNode(tab === "history" ? "History" : "Up next"));
+        button.addEventListener("click", () => this.select(tab));
+        button.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          this.select(tab === "history" ? "queue" : "history");
+          this.tabs.querySelector('[aria-selected="true"]')?.focus();
+        });
+        this.tabs.append(button);
+      }
+      this.list.id = "srd-playback-list";
+      this.list.className = "srd-queue-list";
+      this.list.setAttribute("role", "tabpanel");
+      this.list.tabIndex = 0;
+      this.status.setAttribute("role", "status");
+      this.status.setAttribute("aria-live", "polite");
+      this.root.append(this.tabs, this.hint, this.list, this.status);
+      this.select("queue");
+    }
+    select(tab) {
+      this.actionError = "";
+      this.tab = tab;
+      this.signature = "";
+      this.list.scrollTop = 0;
+      for (const button of this.tabs.querySelectorAll("button")) {
+        const selected = button.id === `srd-${tab}-tab`;
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      }
+      this.list.setAttribute("aria-labelledby", `srd-${tab}-tab`);
+      this.hint.textContent = tab === "history" ? "Choose a song to play it again." : "Drag the handle to change what plays next.";
+      this.render();
+      void this.refresh(true);
+      if (tab === "history") this.root.scrollIntoView({ block: "nearest" });
+    }
+    connect() {
+      const services = desktopServices();
+      if (!services) return false;
+      if (this.services === services) return true;
+      this.unsubscribes.forEach((unsubscribe) => unsubscribe());
+      this.unsubscribes = [];
+      this.services = services;
+      for (const event of ["queue_update", "queue_action_complete", "update"]) {
+        const unsubscribe = services.player.getEvents().addListener(event, () => void this.refresh());
+        if (typeof unsubscribe === "function") this.unsubscribes.push(unsubscribe);
+      }
+      return true;
+    }
+    async refresh(forceHistory = false) {
+      if (this.refreshing || this.busy || this.dragging || !this.root.isConnected) return;
+      if (!this.connect()) {
+        this.status.textContent = "Waiting for Spotify\u2019s player\u2026";
+        return;
+      }
+      this.refreshing = true;
+      try {
+        const queue = this.services.player.getQueue();
+        this.items = [...queue.queued, ...queue.nextUp].filter(playable);
+        if (this.tab === "history" && this.services.history && (forceHistory || Date.now() - this.lastHistory > 15e3)) {
+          let timer;
+          const history = await Promise.race([
+            this.services.history.getContents(),
+            new Promise((_, reject) => {
+              timer = window.setTimeout(() => reject(new Error("History took too long to load. Try the History tab again.")), 1e4);
+            })
+          ]).finally(() => window.clearTimeout(timer));
+          this.histories = history.items.filter(playable).slice(0, 300);
+          this.lastHistory = Date.now();
+        }
+        this.status.textContent = this.actionError || (this.tab === "history" && !this.services.history ? "History is unavailable in this Spotify version." : "");
+        this.render();
+      } catch (error) {
+        this.status.textContent = error instanceof Error ? error.message : "Could not load playback. Try again shortly.";
+      } finally {
+        this.refreshing = false;
+      }
+    }
+    async run(action, message) {
+      if (this.busy || !this.services) return;
+      this.busy = true;
+      this.actionError = "";
+      this.root.setAttribute("aria-busy", "true");
+      this.status.textContent = message;
+      this.render();
+      try {
+        await action();
+        this.status.textContent = "";
+      } catch (error) {
+        this.actionError = `Spotify could not apply that change. ${error instanceof Error ? error.message : "Please try again."}`;
+        this.status.textContent = this.actionError;
+      } finally {
+        this.busy = false;
+        this.root.setAttribute("aria-busy", "false");
+        this.signature = "";
+        this.render();
+        void this.refresh();
+      }
+    }
+    move(sourceKey, targetKey, after) {
+      const source = this.items.find((track) => identity(track) === sourceKey);
+      const target = this.items.find((track) => identity(track) === targetKey);
+      if (!source || !target || source === target) return;
+      void this.run(() => this.services.player.reorderQueue([reference(source)], after ? { after: reference(target) } : { before: reference(target) }), `Moving ${source.name}\u2026`);
+    }
+    render() {
+      const tracks = this.tab === "history" ? this.histories : this.items;
+      const signature = `${this.tab}:${this.busy}:${tracks.map((track) => identity(track) + track.name).join("|")}`;
+      if (signature === this.signature) return;
+      const focus = this.restoreFocus || (this.root.contains(document.activeElement) ? document.activeElement.dataset.focusKey : void 0);
+      if (this.busy) this.restoreFocus = focus;
+      const scrollTop = this.list.scrollTop;
+      this.signature = signature;
+      this.list.replaceChildren();
+      if (!tracks.length) {
+        const empty = document.createElement("li");
+        empty.className = "srd-queue-empty";
+        empty.append(icon(this.tab), document.createTextNode(this.tab === "history" ? "Your recent songs will appear here." : "Start playing to see what\u2019s next."));
+        this.list.append(empty);
+      }
+      tracks.forEach((track, index) => {
+        const key = identity(track);
+        const row = document.createElement("li");
+        row.className = "srd-queue-row";
+        row.dataset.trackKey = key;
+        const play = document.createElement("button");
+        play.type = "button";
+        play.className = "srd-queue-track";
+        play.ariaLabel = `Play ${track.name}`;
+        play.dataset.focusKey = `play:${key}:${index}`;
+        play.disabled = this.busy;
+        const artwork = document.createElement("div");
+        artwork.className = "srd-queue-artwork";
+        artwork.append(icon("music"));
+        const source = (track.images || track.album?.images)?.[0]?.url;
+        if (source && /^(https:\/\/|spotify:image:)/.test(source)) {
+          const image = document.createElement("img");
+          image.src = source;
+          image.alt = "";
+          image.loading = "lazy";
+          image.addEventListener("error", () => image.remove(), { once: true });
+          artwork.append(image);
+        }
+        const copy = text("span", "srd-queue-copy", "");
+        copy.append(text("span", "srd-queue-name", track.name), text("span", "srd-queue-artists", track.artists?.map((a) => a.name).join(", ") || "Spotify"));
+        play.append(artwork, copy);
+        play.addEventListener("click", () => void this.run(
+          () => this.tab === "history" ? this.services.player.playAsNextInQueue([track]) : this.services.player.skipTo(reference(track)),
+          `Playing ${track.name}\u2026`
+        ));
+        row.append(play);
+        if (this.tab === "queue") {
+          row.draggable = !this.busy;
+          const moves = document.createElement("div");
+          moves.className = "srd-queue-moves";
+          for (const [direction, label, delta] of [["up", "Move up", -1], ["down", "Move down", 1]]) {
+            const button = iconButton(direction, `${label}: ${track.name}`);
+            button.dataset.focusKey = `${direction}:${key}`;
+            button.disabled = this.busy || index + delta < 0 || index + delta >= tracks.length;
+            button.addEventListener("click", () => this.move(key, identity(tracks[index + delta]), delta > 0));
+            moves.append(button);
+          }
+          const handle = iconButton("grip", `Drag to reorder: ${track.name}`);
+          handle.classList.add("srd-queue-drag");
+          handle.dataset.focusKey = `drag:${key}`;
+          handle.title = "Drag to reorder; Alt + Arrow Up / Down also works";
+          handle.disabled = this.busy;
+          handle.addEventListener("keydown", (event) => {
+            const delta = event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
+            if (event.altKey && delta && tracks[index + delta]) {
+              event.preventDefault();
+              this.move(key, identity(tracks[index + delta]), delta > 0);
+            }
+          });
+          row.append(moves, handle);
+          row.addEventListener("dragstart", (event) => {
+            if (this.busy || !event.dataTransfer) {
+              event.preventDefault();
+              return;
+            }
+            this.dragging = key;
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("application/x-remixify-queue", key);
+            row.classList.add("srd-queue-row--dragging");
+          });
+          row.addEventListener("dragover", (event) => {
+            if (!this.dragging || this.dragging === key || this.busy) return;
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+            const bounds = row.getBoundingClientRect();
+            row.dataset.drop = event.clientY > bounds.y + bounds.height / 2 ? "after" : "before";
+            const viewport = this.list.getBoundingClientRect();
+            if (event.clientY < viewport.y + 35) this.list.scrollTop -= 12;
+            if (event.clientY > viewport.bottom - 35) this.list.scrollTop += 12;
+          });
+          row.addEventListener("dragleave", (event) => {
+            if (!row.contains(event.relatedTarget)) delete row.dataset.drop;
+          });
+          row.addEventListener("drop", (event) => {
+            event.preventDefault();
+            const source2 = this.dragging;
+            this.dragging = void 0;
+            const after = row.dataset.drop === "after";
+            delete row.dataset.drop;
+            if (source2) this.move(source2, key, after);
+          });
+          row.addEventListener("dragend", () => {
+            this.dragging = void 0;
+            this.root.querySelectorAll("[data-drop]").forEach((node) => delete node.dataset.drop);
+            row.classList.remove("srd-queue-row--dragging");
+          });
+        }
+        this.list.append(row);
+      });
+      this.list.scrollTop = scrollTop;
+      if (focus) [...this.root.querySelectorAll("[data-focus-key]")].find((node) => node.dataset.focusKey === focus)?.focus({ preventScroll: true });
+      if (!this.busy) this.restoreFocus = void 0;
+    }
+  };
+  var panel;
+  var observedZone;
+  var resize;
+  function syncPlaybackPanel(zone, player) {
+    panel ||= new PlaybackPanel();
+    if (panel.root.parentElement !== zone) zone.append(panel.root);
+    if (observedZone !== zone) {
+      observedZone = zone;
+      resize?.disconnect();
+      resize = new ResizeObserver(() => {
+        const cover = zone.querySelector(":scope > .srd-player-artwork");
+        zone.style.setProperty("--srd-now-playing-height", `${player.getBoundingClientRect().height + (cover?.getBoundingClientRect().height || 0)}px`);
+      });
+      resize.observe(player);
+      const artwork = zone.querySelector(".srd-player-artwork");
+      if (artwork) resize.observe(artwork);
+    }
+    void panel.refresh();
+  }
+  window.setInterval(() => {
+    if (!document.hidden) void panel?.refresh();
+  }, 5e3);
+
   // web/src/core.ts
   var SETTINGS_KEY = "spotify-redesign:settings:v2";
   var PACKAGES_KEY = "spotify-redesign:installed-packages";
@@ -4590,6 +5371,8 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
     root.dataset.srdSpotlight = settings.showSpotlight ? "on" : "off";
     applyWallpaper(settings);
     applyThemeStylesheet(settings);
+    syncDesktopChrome();
+    syncCustomIcons();
   }
   function syncSidebarLayout(shell, sidebar) {
     const requestedWidth = Number.parseFloat(sidebar.style.getPropertyValue("--left-sidebar-width"));
@@ -4619,6 +5402,7 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
     backdrop.classList.toggle("srd-player-artwork--empty", !source);
   }
   function labelWindowControls() {
+    if (syncDesktopChrome()) return;
     const parents = /* @__PURE__ */ new Set();
     document.querySelectorAll('[data-testid="window-controls"]').forEach((node) => parents.add(node));
     for (const node of document.querySelectorAll('button, [role="button"]')) {
@@ -4703,13 +5487,18 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
       const isPlayerZone = child.matches('[data-testid="now-playing-bar"]') || Boolean(child.querySelector('[data-testid="now-playing-bar"]'));
       child.classList.toggle("srd-right-sidebar", isRightSidebar);
       child.classList.toggle("srd-player-zone", isPlayerZone);
+      child.classList.toggle("srd-shell-overlay", !isRightSidebar && (child.classList.contains("srd-shell-overlay") || gridArea.includes("right-sidebar")));
       if (isPlayerZone) playerZone = child;
     }
     const player = document.querySelector('[data-testid="now-playing-bar"]');
     player?.classList.add("srd-player");
-    if (playerZone && player) syncPlayerArtwork(playerZone, player);
+    if (playerZone && player) {
+      syncPlayerArtwork(playerZone, player);
+      syncPlaybackPanel(playerZone, player);
+    }
     labelWindowControls();
     labelSearchLayers();
+    syncCustomIcons();
     return true;
   }
   function labelSpotifyStructure() {
@@ -4720,13 +5509,16 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
     let sidebarFrame;
     let sidebarObserver;
     let observedSidebar;
+    let observedShell;
+    let shellClassObserver;
+    let shellResizeObserver;
     const syncShell = () => {
       if (shellFrame !== void 0) return;
-      shellFrame = window.requestAnimationFrame(() => {
+      shellFrame = window.setTimeout(() => {
         shellFrame = void 0;
         labelSpotifyShell();
         observeSidebarWidth();
-      });
+      }, 16);
     };
     const schedule = () => {
       syncShell();
@@ -4753,6 +5545,18 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
       window.requestAnimationFrame(follow);
     };
     const observeSidebarWidth = () => {
+      const shell = document.querySelector("#main-view")?.parentElement;
+      if (shell && shell !== observedShell) {
+        shellClassObserver?.disconnect();
+        shellResizeObserver?.disconnect();
+        observedShell = shell;
+        shellClassObserver = new MutationObserver(() => {
+          if (!shell.classList.contains("srd-app-grid")) syncShell();
+        });
+        shellClassObserver.observe(shell, { attributes: true, attributeFilter: ["class"] });
+        shellResizeObserver = new ResizeObserver(syncShell);
+        shellResizeObserver.observe(shell);
+      }
       const sidebar = document.querySelector("#Desktop_LeftSidebar_Id") || void 0;
       if (sidebar === observedSidebar) return;
       sidebarObserver?.disconnect();
@@ -4776,10 +5580,10 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
       { capture: true }
     );
   }
-  function element(tag, className, text) {
+  function element(tag, className, text2) {
     const node = document.createElement(tag);
     if (className) node.className = className;
-    if (text !== void 0) node.textContent = text;
+    if (text2 !== void 0) node.textContent = text2;
     return node;
   }
   function notify(message, error = false) {
@@ -4919,7 +5723,8 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
     const style = element("style");
     style.id = STYLE_ID;
     style.textContent = `${core_default}
-${layout_fixes_default}`;
+${layout_fixes_default}
+${desktop_default}`;
     document.head.appendChild(style);
   }
   function makeToggle(value, onChange) {
@@ -5584,7 +6389,7 @@ ${layout_fixes_default}`;
       }
       for (const definition of definitions) {
         const card = element("article", "srd-package-card");
-        const icon = element("div", "srd-package-icon", definition.icon === "cat" ? "\u{1F408}" : "\u2726");
+        const icon2 = element("div", "srd-package-icon", definition.icon === "cat" ? "\u{1F408}" : "\u2726");
         const copy = element("div", "srd-package-copy");
         const installed = manager.isInstalled(definition.id);
         const button = element("button", installed ? "srd-button" : "srd-button srd-button--primary", installed ? "Remove" : "Install");
@@ -5617,7 +6422,7 @@ ${layout_fixes_default}`;
             button.disabled = false;
           }
         });
-        card.append(icon, copy);
+        card.append(icon2, copy);
         grid.appendChild(card);
       }
       content.appendChild(grid);
@@ -5629,15 +6434,18 @@ ${layout_fixes_default}`;
     return backdrop;
   }
   function openUpdaterAction(action) {
-    const link = document.createElement("a");
-    link.href = `remixify://${action}`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    void desktopAction(action).catch((error) => {
+      console.warn("[Remixify] Desktop updater connection is unavailable", error);
+    });
+  }
+  function matchingUpdateProgress(notice) {
+    const progress = notice.progress;
+    const version = notice.update?.cli?.version || notice.update?.version;
+    return progress?.version && version && progress.version !== version ? void 0 : progress;
   }
   function updateProgressText(notice) {
-    const progress = notice.progress;
-    if (!progress) return notice.ready ? "Downloaded and verified \u2014 ready to install" : "Waiting for the updater\u2026";
+    const progress = matchingUpdateProgress(notice);
+    if (!progress) return notice.ready ? "Downloaded and verified \u2014 ready to install" : "Update available. Start the download when you are ready.";
     if (progress.stage === "downloading") {
       const bytes = progress.bytes || 0;
       const total = progress.totalBytes || 0;
@@ -5682,28 +6490,31 @@ ${layout_fixes_default}`;
     let acknowledgement;
     const renderProgress = () => {
       statusLabel.textContent = updateProgressText(notice);
-      const progress = notice.progress;
+      const progress = matchingUpdateProgress(notice);
+      const complete = progress?.stage === "complete";
+      const downloading = Boolean(progress && ["checking", "downloading", "verifying"].includes(progress.stage));
       if (progress?.stage === "downloading" && (progress.totalBytes || 0) > 0) bar.value = Math.min(100, (progress.bytes || 0) / progress.totalBytes * 100);
       else if (progress?.stage === "complete") bar.value = 100;
       else if (progress?.steps) bar.value = Math.max(0, ((progress.step || 1) - 1) / progress.steps * 100);
       else if (notice.ready && !busy) bar.value = 100;
       else bar.removeAttribute("value");
       statusView.classList.toggle("srd-update-status--error", progress?.stage === "error");
-      title.textContent = busy ? "Installing update" : notice.ready ? "Install update?" : "Downloading update";
-      install.disabled = busy || !notice.ready && progress?.stage !== "error";
-      install.textContent = busy ? "Installing\u2026" : notice.ready ? "Update now" : progress?.stage === "error" ? "Retry download" : "Downloading\u2026";
+      title.textContent = complete ? "Update complete" : busy ? "Starting updater" : notice.ready ? "Install update?" : downloading ? "Downloading update" : "Update available";
+      copy.textContent = complete ? `Version ${update.version} is installed.` : notice.ready ? `Version ${update.version} is ready. Spotify will close and reopen to install it.` : downloading ? `Version ${update.version} is downloading. You can install it once verification finishes.` : `Version ${update.version} is available to download.`;
+      install.disabled = busy || downloading;
+      install.textContent = complete ? "Done" : busy ? "Starting\u2026" : notice.ready ? "Update now" : progress?.stage === "error" ? "Retry download" : downloading ? "Downloading\u2026" : "Download update";
       cancel.textContent = busy ? "Hide" : "Not now";
     };
     const onProgress = (event) => {
       const next = event.detail;
-      if (next.update?.version !== update.version) return;
-      const progress = next.progress;
+      if (next.update?.version !== update.version && !(next.progress?.stage === "complete" && next.progress.version === (update.cli?.version || update.version))) return;
+      const progress = matchingUpdateProgress({ ...next, update });
       if (requestedAt && (!progress || progress.updatedAt < requestedAt)) return;
       if (requestedAt && progress && progress.updatedAt >= requestedAt && ["checking", "downloading", "verifying", "ready", "starting", "stopping", "installing", "restarting", "complete", "error"].includes(progress.stage)) {
         window.clearTimeout(acknowledgement);
         if (progress.stage === "error") busy = false;
       }
-      notice = next;
+      notice = { ...next, update, progress };
       if (progress && ["checking", "downloading", "verifying", "ready", "complete", "error"].includes(progress.stage)) busy = false;
       renderProgress();
     };
@@ -5719,6 +6530,10 @@ ${layout_fixes_default}`;
       if (event.target === backdrop) dismiss();
     });
     install.addEventListener("click", () => {
+      if (matchingUpdateProgress(notice)?.stage === "complete") {
+        dismiss();
+        return;
+      }
       requestedAt = Date.now();
       const downloading = !notice.ready;
       busy = true;
@@ -5764,12 +6579,10 @@ ${layout_fixes_default}`;
     deactivate.addEventListener("click", () => {
       deactivate.disabled = true;
       deactivate.textContent = "Deactivating\u2026";
-      const action = document.createElement("a");
-      action.href = "remixify://deactivate";
-      action.hidden = true;
-      document.body.appendChild(action);
-      action.click();
-      action.remove();
+      void desktopAction("deactivate").catch(() => {
+        deactivate.disabled = false;
+        deactivate.textContent = "Connection failed \u2014 retry";
+      });
     });
     return backdrop;
   }
@@ -5796,10 +6609,12 @@ ${layout_fixes_default}`;
       host.querySelector(".srd-update-button")?.remove();
       const update = notice.update;
       if (!update) return;
-      const progress = notice.progress;
+      const progress = matchingUpdateProgress(notice);
+      if (progress?.stage === "complete") return;
       const percent = progress?.stage === "downloading" && (progress.totalBytes || 0) > 0 ? ` ${Math.min(100, Math.floor((progress.bytes || 0) / progress.totalBytes * 100))}%` : "";
       const failed = progress?.stage === "error";
-      const label = notice.ready ? "Update" : failed ? "Update failed" : autoDownload ? `Downloading${percent}\u2026` : "Download available";
+      const downloading = Boolean(progress && ["checking", "downloading", "verifying"].includes(progress.stage));
+      const label = notice.ready ? "Update" : failed ? "Update failed" : downloading ? `Downloading${percent}\u2026` : "Update available";
       const updateButton = element("button", "srd-update-button", label);
       updateButton.type = "button";
       updateButton.title = notice.ready ? `Install Remixify ${update.version}` : `Download Remixify ${update.version}`;
@@ -5808,7 +6623,6 @@ ${layout_fixes_default}`;
         if (!notice.ready) {
           document.querySelector(".srd-backdrop")?.remove();
           document.body.appendChild(createUpdateConfirmation(update, notice));
-          if (!autoDownload || failed) openUpdaterAction("download-update");
           return;
         }
         document.querySelector(".srd-backdrop")?.remove();

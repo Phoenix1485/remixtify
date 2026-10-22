@@ -105,6 +105,44 @@
       document.querySelector('[aria-label="Main menu"]').remove();
       window.__SpotifyRedesignConfig = { localChannelUrl: 'redesign/channel.json', autoUpdate: false };
     }
+    const fixtureTracks = Array.from({length: 40}, (_, index) => ({ uri: 'spotify:track:fixture' + index, uid: 'uid-' + index, name: 'Queue song ' + (index + 1), artists: [{name: 'Fixture artist'}] }));
+    window.fixturePlaybackActions = [];
+    window.fixtureQueue = { current: null, queued: fixtureTracks.slice(0, 2), nextUp: fixtureTracks.slice(2) };
+    window.fixtureHistory = [{ uri: 'spotify:track:past', name: 'Previously played', artists: [{name: 'Past artist'}] }];
+    const events = { addListener: () => () => {} };
+    window.fixturePlayer = {
+      getQueue: () => window.fixtureQueue, getState: () => ({}), getEvents: () => events,
+      skipTo: async track => window.fixturePlaybackActions.push(['skip', track]),
+      playAsNextInQueue: async tracks => window.fixturePlaybackActions.push(['replay', tracks]),
+      reorderQueue: async (tracks, position) => {
+        if (window.fixtureRejectMove) throw Error('Move rejected');
+        window.fixturePlaybackActions.push(['reorder', tracks, position]);
+        const queue = [...window.fixtureQueue.queued, ...window.fixtureQueue.nextUp];
+        const moved = queue.find(t => t.uid === tracks[0].uid);
+        const remaining = queue.filter(t => t !== moved);
+        const target = position.before || position.after;
+        const index = remaining.findIndex(t => t.uid === target.uid) + (position.after ? 1 : 0);
+        remaining.splice(index, 0, moved);
+        window.fixtureQueue = { current: null, queued: remaining.slice(0, 2), nextUp: remaining.slice(2) };
+      }
+    };
+    document.querySelector('#main-view')['__reactFiber$fixture'] = {
+      dependencies: {firstContext: {memoizedValue: { resolveNoThrow: token => ({
+        PlayerAPI: window.fixturePlayer,
+        PlayHistoryAPI: { getContents: async () => ({items: window.fixtureHistory}), getEvents: () => events },
+        NativeAPI: new URLSearchParams(location.search).has('native') ? {setWindowButtonsVisibility: async show => { window.fixtureNativeVisible = show; }} : undefined,
+      })[token.description] }}}
+    };
+    if (new URLSearchParams(location.search).has('native')) {
+      window.__SpotifyRedesignConfig.desktopWindowControls = true;
+      const realFetch = window.fetch.bind(window);
+      window.fetch = (input, options = {}) => {
+        const url = String(input);
+        if (url.includes('desktop-control.json')) return Promise.resolve(Response.json({url:'http://127.0.0.1:65534',token:'a'.repeat(64)}));
+        if (url.startsWith('http://127.0.0.1:65534/')) return Promise.resolve(new Response(url.endsWith('/status') ? '{"ready":true}' : '', {status: url.endsWith('/status') ? 200 : 202}));
+        return realFetch(input,options);
+      };
+    }
     const channelUrl = new URL('../../build/site/channel.json', location.href).href;
     fetch(channelUrl).then(response => response.json()).then(channel => {
       window.__SpotifyRedesignBootstrap = { channel, channelUrl, usingFallback: true, autoUpdate: false, updateReady: false };

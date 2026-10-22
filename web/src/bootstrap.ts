@@ -56,7 +56,7 @@ async function fetchChannel(url: string): Promise<UpdateChannel> {
   return channel;
 }
 
-async function fetchUpdateStatus(url: string): Promise<{ ready: boolean; version?: string; progress?: UpdateNotice["progress"] }> {
+async function fetchUpdateStatus(url: string): Promise<{ ready: boolean; version?: string; installedVersion?: string; progress?: UpdateNotice["progress"] }> {
   const separator = url.includes("?") ? "&" : "?";
   const response = await fetch(`${url}${separator}t=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) return { ready: false };
@@ -100,6 +100,7 @@ async function start(): Promise<void> {
         const status = await fetchUpdateStatus(statusUrl);
         updateProgress = status.progress;
         updateReady = status.ready && status.version === (remoteChannel.cli?.version || remoteChannel.version);
+        if (status.installedVersion === (remoteChannel.cli?.version || remoteChannel.version)) availableUpdate = undefined;
       }
     } catch (error) {
       console.warn("[Remixify] Remote update check unavailable.", error);
@@ -128,6 +129,7 @@ async function start(): Promise<void> {
           availableUpdate = remoteChannel.version !== localChannel.version ? remoteChannel : undefined;
         }
         const status = await fetchUpdateStatus(statusUrl);
+        if (availableUpdate && status.installedVersion === (availableUpdate.cli?.version || availableUpdate.version)) availableUpdate = undefined;
         const notice: UpdateNotice = {
           update: availableUpdate,
           ready:

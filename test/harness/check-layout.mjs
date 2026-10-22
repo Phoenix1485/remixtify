@@ -31,7 +31,7 @@ try {
       return {
         nav: rect('.srd-global-nav'), caption: rect('.srd-window-controls'), menu: rect('[aria-label="Main menu"]'),
         player: rect('.srd-player-zone'), play: rect('[data-testid="control-button-playpause"]'),
-        icon: rect('[data-testid="control-button-playpause"] svg'), shelf: rect('[data-testid="component-shelf"]'), cards,
+        icon: rect('[data-testid="control-button-playpause"] > .srd-icon svg'), shelf: rect('[data-testid="component-shelf"]'), cards,
         buttons: document.querySelectorAll('.srd-window-control').length,
         pageWidth: document.documentElement.scrollWidth, viewport: innerWidth,
       };
@@ -48,7 +48,7 @@ try {
     assert(geometry.pageWidth <= geometry.viewport, "window must not overflow horizontally");
     const searchWidth = await page.locator('[data-testid="search-input"]').evaluate(n => n.getBoundingClientRect().width);
     assert(searchWidth > 200, 'native collapsed search styles must not reduce the input to an icon');
-    assert.notEqual(await page.locator('[data-testid="control-button-playpause"] path').evaluate(n => getComputedStyle(n).fill), 'rgb(0, 0, 0)', 'native inverted spans must not turn the play icon black');
+    assert.notEqual(await page.locator('[data-testid="control-button-playpause"] > .srd-icon path').evaluate(n => getComputedStyle(n).fill), 'rgb(0, 0, 0)', 'native inverted spans must not turn the play icon black');
     const card = page.locator('.e-10451-card').first();
     await card.hover();
     await page.waitForTimeout(220);
@@ -119,7 +119,7 @@ try {
   });
   await updatePage.locator('.srd-update-button').click();
   assert.equal(await updatePage.locator('.srd-update-progress').evaluate(n => n.value), 50);
-  assert(await updatePage.getByRole('button', { name: /^Downloading/ }).isDisabled());
+  assert(await updatePage.locator('.srd-modal').getByRole('button', { name: /^Downloading/ }).isDisabled());
   await updatePage.evaluate(() => window.fixtureProgress(true, { stage: 'ready' }));
   await updatePage.getByRole('button', { name: 'Update now', exact: true }).click();
   await updatePage.waitForFunction(() => document.querySelector('.srd-update-status--error'), { timeout: 12000 });
@@ -129,25 +129,47 @@ try {
   await updatePage.evaluate(() => window.fixtureProgress(true, { stage: 'installing', step: 3, steps: 4, message: 'Repairing launchers' }));
   assert.equal(await updatePage.locator('.srd-update-progress').evaluate(n => n.value), 50);
   assert((await updatePage.locator('.srd-update-status-label').textContent()).includes('Repairing launchers'));
+  await updatePage.evaluate(() => window.fixtureProgress(false, { stage: 'complete', version: 'next', message: 'Update installed successfully' }));
+  assert.equal(await updatePage.locator('.srd-modal-title').textContent(), 'Update complete');
+  await updatePage.getByRole('button', { name: 'Done', exact: true }).click();
+  await updatePage.evaluate(() => window.fixtureProgress(false, { stage: 'complete', version: 'older-release', message: 'Old install complete' }));
+  await updatePage.locator('.srd-update-button').click();
+  assert.equal(await updatePage.locator('.srd-modal-title').textContent(), 'Update available', 'stale progress must not look like an active or completed download');
+  assert(await updatePage.getByRole('button', { name: 'Download update', exact: true }).isEnabled());
   await updates.close();
 
   const native = await browser.newContext({ viewport: { width: 1920, height: 1080 }, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/142.0.0.0 Safari/537.36' });
   const page = await native.newPage();
   await page.goto(`${base}/test/harness/desktop.html?native`);
-  await page.waitForSelector('.srd-native-caption-frame', { state: 'visible' });
+  await page.waitForSelector('#srd-custom-caption', { state: 'visible' });
   const nativeGeometry = await page.evaluate(() => {
-    const nav = document.querySelector('.srd-global-nav').getBoundingClientRect();
-    const caption = document.querySelector('.srd-native-caption-frame').getBoundingClientRect();
-    const menu = document.querySelector('.srd-native-menu-frame').getBoundingClientRect();
-    return { captionGap: caption.x - nav.right, navCenter: nav.y + nav.height / 2, captionCenter: caption.y + caption.height / 2, menuCenter: menu.y + menu.height / 2, pointerEvents: getComputedStyle(document.querySelector('.srd-native-caption-frame')).pointerEvents };
+    const rect = n => {const b = n.getBoundingClientRect();return {x:b.x,y:b.y,w:b.width,h:b.height,cx:b.x+b.width/2,cy:b.y+b.height/2};};
+    return {nav:rect(document.querySelector('.srd-global-nav')),caption:rect(document.querySelector('#srd-custom-caption')),menu:rect(document.querySelector('#srd-custom-menu button')),background:getComputedStyle(document.querySelector('#srd-custom-caption')).backgroundColor};
   });
-  assert(nativeGeometry.captionGap >= 16);
-  assert.equal(nativeGeometry.navCenter, nativeGeometry.captionCenter);
-  assert.equal(nativeGeometry.navCenter, nativeGeometry.menuCenter);
-  assert.equal(nativeGeometry.pointerEvents, 'none', 'decorative frames must not intercept native actions');
+  assert.equal(nativeGeometry.nav.y,16,'navigation needs the same outer inset as the cards');
+  assert.equal(nativeGeometry.background,'rgba(0, 0, 0, 0)','window controls must have no shared background slab');
+  assert.equal(nativeGeometry.nav.cy,nativeGeometry.caption.cy);
+  assert.equal(nativeGeometry.nav.cy,nativeGeometry.menu.cy,'menu dots must be vertically centered');
+  assert(nativeGeometry.caption.x-nativeGeometry.nav.x-nativeGeometry.nav.w>=15);
+  assert.equal(await page.evaluate(() => window.fixtureNativeVisible),false,'native controls must be hidden only when the custom handler is installed');
+  await page.getByRole('button',{name:'Main menu',exact:true}).click();
+  await page.getByRole('menuitem',{name:'Song history',exact:true}).click();
+  await page.getByRole('button',{name:'Play Previously played',exact:true}).click();
+  await page.waitForFunction(() => window.fixturePlaybackActions.some(a=>a[0]==='replay'));
+  await page.getByRole('tab',{name:'Up next',exact:true}).click();
+  const queueScroll = await page.locator('.srd-queue-list').evaluate(n=>n.scrollHeight>n.clientHeight);
+  assert(queueScroll,'long queues must scroll within the panel');
+  await page.getByRole('button',{name:'Move up: Queue song 3',exact:true}).click();
+  await page.waitForFunction(() => window.fixtureQueue.queued[1].uid==='uid-2');
+  assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll('.srd-queue-name')].slice(0,3).map(n=>n.textContent)),['Queue song 1','Queue song 3','Queue song 2']);
+  await page.evaluate(()=>window.fixtureRejectMove=true);
+  await page.getByRole('button',{name:'Move down: Queue song 3',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.srd-queue-status').textContent.includes('Move rejected'));
+  assert.equal(await page.evaluate(()=>window.fixtureQueue.queued[1].uid),'uid-2','failed reorder must not fake a local queue change');
   await page.getByRole('button', { name: 'Open Remixify settings', exact: true }).click();
   await page.getByRole('button', { name: 'Classic', exact: true }).click();
-  assert.equal(await page.locator('.srd-native-caption-frame').evaluate(node => getComputedStyle(node).display), 'none', 'classic mode must restore the original caption layout');
+  await page.waitForFunction(()=>window.fixtureNativeVisible===true);
+  assert.equal(await page.locator('.srd-queue-panel').evaluate(n=>getComputedStyle(n).display),'none','classic mode must hide the added panel');
   await native.close();
   console.log('PASS: search stacking, caption actions/alignment, play/pause centering, card gutters, responsive layout, appearance controls, native fallback and classic mode.');
 } finally { await browser.close(); }

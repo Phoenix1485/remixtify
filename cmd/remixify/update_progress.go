@@ -49,7 +49,7 @@ func publishUpdateProgress(cfg appconfig.Config, assets fs.FS, progress updater.
 func updateProtocolScript(stateDir string) string {
 	state := strings.ReplaceAll(stateDir, `"`, `""`)
 	var cases strings.Builder
-	for _, action := range []string{"update-now", "download-update", "deactivate"} {
+	for _, action := range []string{"update-now", "download-update", "deactivate", "window-minimize", "window-maximize", "window-close"} {
 		fmt.Fprintf(&cases, "Case \"remixify://%s\", \"remixtify://%s\", \"spotify-redesign://%s\": action = \"%s\"\r\n", action, action, action, action)
 	}
 	return "Option Explicit\r\nDim shell, files, current, exe, uri, action\r\n" +

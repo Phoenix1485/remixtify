@@ -19,6 +19,7 @@ import (
 	"remixify/internal/patcher"
 	"remixify/internal/singleinstance"
 	"remixify/internal/updater"
+	"remixify/internal/windowcontrol"
 )
 
 var version = "dev"
@@ -63,6 +64,8 @@ func run(arguments []string) error {
 	}
 
 	switch arguments[0] {
+	case "window-minimize", "window-maximize", "window-close":
+		return windowcontrol.Run(strings.TrimPrefix(arguments[0], "window-"))
 	case "install":
 		flags := flag.NewFlagSet("install", flag.ContinueOnError)
 		spotifyPath := flags.String("spotify", cfg.SpotifyPath, "Spotify installation directory")
@@ -757,6 +760,12 @@ func watchMaintenance(cfg appconfig.Config, assets fs.FS, skipUpdate, once bool)
 		return nil
 	}
 	patchManager := manager(cfg, assets)
+	closeBridge, bridgeErr := startDesktopBridge(cfg, assets)
+	if bridgeErr != nil {
+		appendMaintenanceLog(cfg.StateDir, "desktop bridge failed: "+bridgeErr.Error())
+	} else {
+		defer closeBridge()
+	}
 	nextStorePathRefresh := time.Now()
 	downloadUpdate := func() {
 		previous, _ := updater.Pending(cfg.StateDir)
