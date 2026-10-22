@@ -11,11 +11,13 @@ const channel = JSON.parse(await readFile(channelPath, "utf8"));
 const bytes = await readFile(binaryPath);
 const repository = process.env.GITHUB_REPOSITORY || "OWNER/REPOSITORY";
 const assetName = path.basename(binaryPath);
+const version = process.env.GITHUB_SHA?.slice(0, 12) || channel.version;
 channel.cli = {
-  version: process.env.GITHUB_SHA?.slice(0, 12) || channel.version,
+  version,
   downloads: {
     "windows-amd64": {
-      url: `https://github.com/${repository}/releases/download/continuous/${assetName}`,
+      // The continuous asset is replaced each release; give caches a unique key.
+      url: `https://github.com/${repository}/releases/download/continuous/${assetName}?v=${encodeURIComponent(version)}`,
       sha256: createHash("sha256").update(bytes).digest("hex"),
     },
   },
