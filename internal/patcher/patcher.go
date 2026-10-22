@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"remixify/internal/updater"
 )
 
 const (
@@ -296,9 +298,15 @@ func (m Manager) installRuntime(xpuiDir string, marker Marker) error {
 
 func writeUpdateStatus(stateDir, runtimeDir string) error {
 	status := struct {
-		Ready   bool   `json:"ready"`
-		Version string `json:"version,omitempty"`
+		Ready    bool             `json:"ready"`
+		Version  string           `json:"version,omitempty"`
+		Progress updater.Progress `json:"progress"`
 	}{}
+	progress, err := updater.ReadProgress(stateDir)
+	if err != nil {
+		return err
+	}
+	status.Progress = progress
 	raw, err := os.ReadFile(filepath.Join(stateDir, "pending-update.json"))
 	if err == nil {
 		var pending struct {
@@ -312,11 +320,7 @@ func writeUpdateStatus(stateDir, runtimeDir string) error {
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
-	statusRaw, err := json.Marshal(status)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filepath.Join(runtimeDir, "update-status.json"), append(statusRaw, '\n'), 0o644)
+	return updater.WriteJSON(filepath.Join(runtimeDir, "update-status.json"), status)
 }
 
 func patchIndex(path string) error {

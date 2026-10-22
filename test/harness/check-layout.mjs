@@ -46,6 +46,15 @@ try {
     assert(geometry.cards[0].x - geometry.shelf.x >= 23, "first card needs the same inset as its shelf header");
     assert(geometry.cards[1].x - geometry.cards[0].x - geometry.cards[0].w >= 15, "cards need a consistent gutter");
     assert(geometry.pageWidth <= geometry.viewport, "window must not overflow horizontally");
+    const searchWidth = await page.locator('[data-testid="search-input"]').evaluate(n => n.getBoundingClientRect().width);
+    assert(searchWidth > 200, 'native collapsed search styles must not reduce the input to an icon');
+    assert.notEqual(await page.locator('[data-testid="control-button-playpause"] path').evaluate(n => getComputedStyle(n).fill), 'rgb(0, 0, 0)', 'native inverted spans must not turn the play icon black');
+    const card = page.locator('.e-10451-card').first();
+    await card.hover();
+    await page.waitForTimeout(220);
+    const hover = await card.evaluate(n => ({ bg: getComputedStyle(n).backgroundColor, transform: getComputedStyle(n).transform }));
+    assert.notEqual(hover.bg, 'rgb(31, 31, 31)', 'hover must keep the glass surface');
+    assert(hover.transform.includes('-2'), 'hover should lift the card gently');
     await page.locator('.transport-side').first().evaluate(node => {
       const extra = document.createElement('button'); extra.ariaLabel = 'Seek backward'; extra.textContent = '15'; node.appendChild(extra);
     });
@@ -96,6 +105,30 @@ try {
     assert.deepEqual(errors, [], "runtime should have no page errors");
     await context.close();
   }
+
+  const updates = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+  const updatePage = await updates.newPage();
+  await updatePage.goto(base + '/test/harness/desktop.html');
+  await updatePage.waitForFunction(() => window.SpotifyRedesign);
+  await updatePage.evaluate(() => {
+    window.fixtureUpdate = { ...window.__SpotifyRedesignBootstrap.channel, version: 'next' };
+    window.fixtureProgress = (ready, progress) => window.dispatchEvent(new CustomEvent('spotify-redesign:update-available', { detail: { update: window.fixtureUpdate, ready, progress: { ...progress, updatedAt: Date.now() } } }));
+    document.addEventListener('click', e => { if (e.target instanceof HTMLAnchorElement && e.target.protocol === 'remixify:') e.preventDefault(); }, true);
+    window.fixtureProgress(false, { stage: 'downloading', bytes: 512, totalBytes: 1024 });
+  });
+  await updatePage.locator('.srd-update-button').click();
+  assert.equal(await updatePage.locator('.srd-update-progress').evaluate(n => n.value), 50);
+  assert(await updatePage.getByRole('button', { name: /^Downloading/ }).isDisabled());
+  await updatePage.evaluate(() => window.fixtureProgress(true, { stage: 'ready' }));
+  await updatePage.getByRole('button', { name: 'Update now', exact: true }).click();
+  await updatePage.waitForFunction(() => document.querySelector('.srd-update-status--error'), { timeout: 12000 });
+  assert((await updatePage.locator('.srd-update-status-label').textContent()).includes('Windows did not respond'));
+  assert(await updatePage.getByRole('button', { name: 'Update now', exact: true }).isEnabled());
+  await updatePage.getByRole('button', { name: 'Update now', exact: true }).click();
+  await updatePage.evaluate(() => window.fixtureProgress(true, { stage: 'installing', step: 3, steps: 4, message: 'Repairing launchers' }));
+  assert.equal(await updatePage.locator('.srd-update-progress').evaluate(n => n.value), 50);
+  assert((await updatePage.locator('.srd-update-status-label').textContent()).includes('Repairing launchers'));
+  await updates.close();
 
   const native = await browser.newContext({ viewport: { width: 1920, height: 1080 }, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/142.0.0.0 Safari/537.36' });
   const page = await native.newPage();

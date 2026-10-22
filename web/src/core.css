@@ -2585,13 +2585,8 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testi
 
 /* Rows, action bars and identity/detail panels use the same translucent material. */
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
-  [data-testid="action-bar"],
   [data-testid="track-list"] > [role="presentation"]:first-child,
-  [data-testid="tracklist-row"],
-  .main-trackList-trackListRow,
   [data-testid="artist-entity-view"] .contentSpacing,
-  [data-testid="playlist-page"] .contentSpacing,
-  [data-testid="album-page"] .contentSpacing,
   [data-testid="home-ad-card"]
 ) {
   border-color: var(--srd-milk-border-soft) !important;

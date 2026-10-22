@@ -56,7 +56,7 @@ async function fetchChannel(url: string): Promise<UpdateChannel> {
   return channel;
 }
 
-async function fetchUpdateStatus(url: string): Promise<{ ready: boolean; version?: string }> {
+async function fetchUpdateStatus(url: string): Promise<{ ready: boolean; version?: string; progress?: UpdateNotice["progress"] }> {
   const separator = url.includes("?") ? "&" : "?";
   const response = await fetch(`${url}${separator}t=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) return { ready: false };
@@ -90,6 +90,7 @@ async function start(): Promise<void> {
   const localChannel = await fetchChannel(localChannelUrl);
   let availableUpdate: UpdateChannel | undefined;
   let updateReady = false;
+  let updateProgress: UpdateNotice["progress"];
 
   if (remoteUrl) {
     try {
@@ -97,6 +98,7 @@ async function start(): Promise<void> {
       if (remoteChannel.version !== localChannel.version) {
         availableUpdate = remoteChannel;
         const status = await fetchUpdateStatus(statusUrl);
+        updateProgress = status.progress;
         updateReady = status.ready && status.version === (remoteChannel.cli?.version || remoteChannel.version);
       }
     } catch (error) {
@@ -111,6 +113,7 @@ async function start(): Promise<void> {
     autoUpdate: settings.autoUpdate,
     availableUpdate,
     updateReady,
+    updateProgress,
   };
   const coreUrl = new URL(localChannel.core.entry, localChannelUrl).href;
   const separator = coreUrl.includes("?") ? "&" : "?";
@@ -131,13 +134,14 @@ async function start(): Promise<void> {
             Boolean(availableUpdate) &&
             status.ready &&
             status.version === (availableUpdate?.cli?.version || availableUpdate?.version),
+          progress: status.progress,
         };
         window.dispatchEvent(new CustomEvent("spotify-redesign:update-available", { detail: notice }));
       } catch (error) {
         console.warn("[Remixify] Update check unavailable.", error);
       }
     };
-    window.setInterval(() => void publish(false), 10_000);
+    window.setInterval(() => { if (!document.hidden) void publish(false); }, 1_000);
     window.setInterval(() => void publish(true), 60_000);
   }
 }

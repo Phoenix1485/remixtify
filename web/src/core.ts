@@ -1451,7 +1451,30 @@ function createSettingsModal(manager: PackageManager, channel: UpdateChannel, us
   return backdrop;
 }
 
-function createUpdateConfirmation(update: UpdateChannel): HTMLElement {
+function openUpdaterAction(action: "update-now" | "download-update"): void {
+  const link = document.createElement("a");
+  link.href = `remixify://${action}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function updateProgressText(notice: UpdateNotice): string {
+  const progress = notice.progress;
+  if (!progress) return notice.ready ? "Downloaded and verified — ready to install" : "Waiting for the updater…";
+  if (progress.stage === "downloading") {
+    const bytes = progress.bytes || 0;
+    const total = progress.totalBytes || 0;
+    const size = `${(bytes / 1048576).toFixed(1)} MB`;
+    return total > 0
+      ? `Downloading ${Math.min(100, Math.floor(bytes / total * 100))}% · ${size} / ${(total / 1048576).toFixed(1)} MB`
+      : `Downloading · ${size}`;
+  }
+  const step = progress.steps ? `Step ${progress.step} of ${progress.steps}: ` : "";
+  return step + (progress.message || progress.stage);
+}
+
+function createUpdateConfirmation(update: UpdateChannel, initial: UpdateNotice = { update, ready: true }): HTMLElement {
   const backdrop = element("div", "srd-backdrop");
   const modal = element("section", "srd-modal");
   const header = element("header", "srd-modal-header");
@@ -1464,32 +1487,82 @@ function createUpdateConfirmation(update: UpdateChannel): HTMLElement {
   const copy = element(
     "p",
     "srd-confirm-copy",
-    `Version ${update.version} is ready. Spotify needs to close and reopen to finish installing it. Do you want to update now?`,
+    initial.ready
+      ? `Version ${update.version} is ready. Spotify will close and reopen to install it.`
+      : `Version ${update.version} is downloading in the background. You can install it once verification finishes.`,
   );
   const actions = element("div", "srd-confirm-actions");
+  const statusView = element("div", "srd-update-status");
+  statusView.setAttribute("role", "status");
+  statusView.setAttribute("aria-live", "polite");
+  const statusLabel = element("div", "srd-update-status-label");
+  const bar = element("progress", "srd-update-progress");
+  bar.max = 100;
+  bar.ariaLabel = "Update progress";
+  statusView.append(statusLabel, bar);
   const cancel = element("button", "srd-button", "Not now");
   const install = element("button", "srd-button srd-button--primary", "Update now");
   cancel.type = install.type = "button";
   actions.append(cancel, install);
-  modal.append(header, copy, actions);
+  modal.append(header, copy, statusView, actions);
   backdrop.appendChild(modal);
 
-  const dismiss = () => backdrop.remove();
+  let notice = initial;
+  let requestedAt = 0;
+  let busy = false;
+  let acknowledgement: number | undefined;
+  const renderProgress = () => {
+    statusLabel.textContent = updateProgressText(notice);
+    const progress = notice.progress;
+    if (progress?.stage === "downloading" && (progress.totalBytes || 0) > 0) bar.value = Math.min(100, (progress.bytes || 0) / progress.totalBytes! * 100);
+    else if (progress?.stage === "complete") bar.value = 100;
+    else if (progress?.steps) bar.value = Math.max(0, ((progress.step || 1) - 1) / progress.steps * 100);
+    else if (notice.ready && !busy) bar.value = 100;
+    else bar.removeAttribute("value");
+    statusView.classList.toggle("srd-update-status--error", progress?.stage === "error");
+    title.textContent = busy ? "Installing update" : notice.ready ? "Install update?" : "Downloading update";
+    install.disabled = busy || (!notice.ready && progress?.stage !== "error");
+    install.textContent = busy ? "Installing…" : notice.ready ? "Update now" : progress?.stage === "error" ? "Retry download" : "Downloading…";
+    cancel.textContent = busy ? "Hide" : "Not now";
+  };
+  const onProgress = (event: Event) => {
+    const next = (event as CustomEvent<UpdateNotice>).detail;
+    if (next.update?.version !== update.version) return;
+    const progress = next.progress;
+    if (requestedAt && (!progress || progress.updatedAt < requestedAt)) return;
+    if (requestedAt && progress && progress.updatedAt >= requestedAt && ["checking", "downloading", "verifying", "ready", "starting", "stopping", "installing", "restarting", "complete", "error"].includes(progress.stage)) {
+      window.clearTimeout(acknowledgement);
+      if (progress.stage === "error") busy = false;
+    }
+    notice = next;
+    if (progress && ["checking", "downloading", "verifying", "ready", "complete", "error"].includes(progress.stage)) busy = false;
+    renderProgress();
+  };
+  window.addEventListener("spotify-redesign:update-available", onProgress);
+  const dismiss = () => {
+    window.clearTimeout(acknowledgement);
+    window.removeEventListener("spotify-redesign:update-available", onProgress);
+    backdrop.remove();
+  };
   close.addEventListener("click", dismiss);
   cancel.addEventListener("click", dismiss);
   backdrop.addEventListener("mousedown", (event) => {
     if (event.target === backdrop) dismiss();
   });
   install.addEventListener("click", () => {
-    install.disabled = true;
-    install.textContent = "Starting update\u2026";
-    const action = document.createElement("a");
-    action.href = "remixify://update-now";
-    action.hidden = true;
-    document.body.appendChild(action);
-    action.click();
-    action.remove();
+    requestedAt = Date.now();
+    const downloading = !notice.ready;
+    busy = true;
+    notice = { ...notice, progress: { stage: "starting", message: "Waiting for Windows to start the updater…", updatedAt: requestedAt } };
+    renderProgress();
+    openUpdaterAction(downloading ? "download-update" : "update-now");
+    acknowledgement = window.setTimeout(() => {
+      busy = false;
+      notice = { ...notice, progress: { stage: "error", message: "Windows did not respond to the update link. Retry the update; if it still fails, restart Remixify to repair the link. Your downloaded update is still saved.", updatedAt: Date.now() } };
+      renderProgress();
+    }, 9_000);
   });
+  renderProgress();
   return backdrop;
 }
 
@@ -1563,31 +1636,30 @@ function mountTopbarControls(
     host.querySelector(".srd-update-button")?.remove();
     const update = notice.update;
     if (!update) return;
-    const label = notice.ready ? "Update" : autoDownload ? "Downloading\u2026" : "Download available";
+    const progress = notice.progress;
+    const percent = progress?.stage === "downloading" && (progress.totalBytes || 0) > 0
+      ? ` ${Math.min(100, Math.floor((progress.bytes || 0) / progress.totalBytes! * 100))}%` : "";
+    const failed = progress?.stage === "error";
+    const label = notice.ready ? "Update" : failed ? "Update failed" : autoDownload ? `Downloading${percent}…` : "Download available";
     const updateButton = element("button", "srd-update-button", label);
     updateButton.type = "button";
     updateButton.title = notice.ready
       ? `Install Remixify ${update.version}`
       : `Download Remixify ${update.version}`;
-    updateButton.disabled = !notice.ready && autoDownload;
+    updateButton.title = updateProgressText(notice);
     updateButton.addEventListener("click", () => {
       if (!notice.ready) {
-        updateButton.disabled = true;
-        updateButton.textContent = "Downloading\u2026";
-        const action = document.createElement("a");
-        action.href = "remixify://download-update";
-        action.hidden = true;
-        document.body.appendChild(action);
-        action.click();
-        action.remove();
+        document.querySelector(".srd-backdrop")?.remove();
+        document.body.appendChild(createUpdateConfirmation(update, notice));
+        if (!autoDownload || failed) openUpdaterAction("download-update");
         return;
       }
       document.querySelector(".srd-backdrop")?.remove();
-      document.body.appendChild(createUpdateConfirmation(update));
+      document.body.appendChild(createUpdateConfirmation(update, notice));
     });
     host.appendChild(updateButton);
   };
-  showAvailableUpdate({ update: availableUpdate, ready: updateReady });
+  showAvailableUpdate({ update: availableUpdate, ready: updateReady, progress: window.__SpotifyRedesignBootstrap?.updateProgress });
   window.addEventListener("spotify-redesign:update-available", (event) => {
     showAvailableUpdate((event as CustomEvent<UpdateNotice>).detail);
   });

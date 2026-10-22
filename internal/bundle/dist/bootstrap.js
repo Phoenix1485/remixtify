@@ -85,12 +85,14 @@
     const localChannel = await fetchChannel(localChannelUrl);
     let availableUpdate;
     let updateReady = false;
+    let updateProgress;
     if (remoteUrl) {
       try {
         const remoteChannel = await fetchChannel(remoteUrl);
         if (remoteChannel.version !== localChannel.version) {
           availableUpdate = remoteChannel;
           const status = await fetchUpdateStatus(statusUrl);
+          updateProgress = status.progress;
           updateReady = status.ready && status.version === (remoteChannel.cli?.version || remoteChannel.version);
         }
       } catch (error) {
@@ -103,7 +105,8 @@
       usingFallback: true,
       autoUpdate: settings.autoUpdate,
       availableUpdate,
-      updateReady
+      updateReady,
+      updateProgress
     };
     const coreUrl = new URL(localChannel.core.entry, localChannelUrl).href;
     const separator = coreUrl.includes("?") ? "&" : "?";
@@ -119,14 +122,17 @@
           const status = await fetchUpdateStatus(statusUrl);
           const notice = {
             update: availableUpdate,
-            ready: Boolean(availableUpdate) && status.ready && status.version === (availableUpdate?.cli?.version || availableUpdate?.version)
+            ready: Boolean(availableUpdate) && status.ready && status.version === (availableUpdate?.cli?.version || availableUpdate?.version),
+            progress: status.progress
           };
           window.dispatchEvent(new CustomEvent("spotify-redesign:update-available", { detail: notice }));
         } catch (error) {
           console.warn("[Remixify] Update check unavailable.", error);
         }
       };
-      window.setInterval(() => void publish(false), 1e4);
+      window.setInterval(() => {
+        if (!document.hidden) void publish(false);
+      }, 1e3);
       window.setInterval(() => void publish(true), 6e4);
     }
   }

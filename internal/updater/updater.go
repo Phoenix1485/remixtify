@@ -34,15 +34,34 @@ type PendingUpdate struct {
 }
 
 func Check(channelURL, currentVersion, stateDir string) (string, error) {
+	return CheckWithProgress(channelURL, currentVersion, stateDir, nil)
+}
+
+func CheckWithProgress(channelURL, currentVersion, stateDir string, onProgress func()) (targetPath string, resultErr error) {
 	if strings.TrimSpace(channelURL) == "" || currentVersion == "dev" {
 		return "", nil
 	}
+	progress := Progress{Stage: "checking", Message: "Checking for updates"}
+	emit := func() {
+		_ = ReportProgress(stateDir, progress)
+		if onProgress != nil {
+			onProgress()
+		}
+	}
+	defer func() {
+		if resultErr != nil {
+			progress.Stage = "error"
+			progress.Message = resultErr.Error()
+			emit()
+		}
+	}()
+	emit()
 	request, err := http.NewRequest(http.MethodGet, channelURL, nil)
 	if err != nil {
 		return "", err
 	}
 	request.Header.Set("User-Agent", "Remixify/"+currentVersion)
-	client := &http.Client{Timeout: 15 * time.Second}
+	client := &http.Client{Timeout: 2 * time.Minute}
 	response, err := client.Do(request)
 	if err != nil {
 		return "", err
@@ -56,8 +75,12 @@ func Check(channelURL, currentVersion, stateDir string) (string, error) {
 		return "", err
 	}
 	if update.CLI == nil || update.CLI.Version == "" || update.CLI.Version == currentVersion {
+		progress.Stage = "idle"
+		progress.Message = "You are up to date"
+		emit()
 		return "", nil
 	}
+	progress.Version = update.CLI.Version
 	key := runtime.GOOS + "-" + runtime.GOARCH
 	download, ok := update.CLI.Downloads[key]
 	if !ok || download.URL == "" || download.SHA256 == "" {
@@ -77,14 +100,27 @@ func Check(channelURL, currentVersion, stateDir string) (string, error) {
 		if err := writePending(stateDir, update.CLI.Version, target, download.SHA256); err != nil {
 			return "", err
 		}
+		progress.Stage = "ready"
+		progress.Message = "Downloaded and verified — ready to install"
+		emit()
 		return target, nil
 	}
 
 	temporary := target + ".download"
-	if err := downloadFile(client, download.URL, temporary); err != nil {
+	defer os.Remove(temporary)
+	progress.Stage = "downloading"
+	progress.Message = "Downloading update"
+	emit()
+	if err := downloadFileWithProgress(client, download.URL, temporary, func(bytes, total int64) {
+		progress.Bytes = bytes
+		progress.TotalBytes = total
+		emit()
+	}); err != nil {
 		return "", err
 	}
-	defer os.Remove(temporary)
+	progress.Stage = "verifying"
+	progress.Message = "Verifying download checksum"
+	emit()
 	if !validFile(temporary, download.SHA256) {
 		return "", errors.New("downloaded update failed SHA-256 verification")
 	}
@@ -97,6 +133,9 @@ func Check(channelURL, currentVersion, stateDir string) (string, error) {
 	if err := writePending(stateDir, update.CLI.Version, target, download.SHA256); err != nil {
 		return "", err
 	}
+	progress.Stage = "ready"
+	progress.Message = "Downloaded and verified — ready to install"
+	emit()
 	return target, nil
 }
 
@@ -159,6 +198,10 @@ func writePending(stateDir, version, path, sha256 string) error {
 }
 
 func downloadFile(client *http.Client, url, destination string) error {
+	return downloadFileWithProgress(client, url, destination, func(int64, int64) {})
+}
+
+func downloadFileWithProgress(client *http.Client, url, destination string, report func(int64, int64)) error {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
@@ -176,10 +219,16 @@ func downloadFile(client *http.Client, url, destination string) error {
 	if err != nil {
 		return err
 	}
-	_, copyErr := io.Copy(file, io.LimitReader(response.Body, 100<<20))
+	progress := &progressWriter{total: response.ContentLength, report: report}
+	report(0, response.ContentLength)
+	_, copyErr := io.Copy(file, io.TeeReader(io.LimitReader(response.Body, 100<<20), progress))
+	report(progress.bytes, response.ContentLength)
 	closeErr := file.Close()
 	if copyErr != nil {
 		return copyErr
+	}
+	if response.ContentLength >= 0 && progress.bytes != response.ContentLength {
+		return fmt.Errorf("incomplete update download: received %d of %d bytes", progress.bytes, response.ContentLength)
 	}
 	return closeErr
 }

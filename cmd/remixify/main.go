@@ -25,6 +25,19 @@ var version = "dev"
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
+		if errors.Is(err, errUpdateBusy) {
+			return
+		}
+		if len(os.Args) > 1 && (os.Args[1] == "update-now" || os.Args[1] == "download-update" || os.Args[1] == "update") {
+			if cfg, configErr := appconfig.Load(); configErr == nil {
+				assets, _ := fs.Sub(bundle.Files, "dist")
+				progress, _ := updater.ReadProgress(cfg.StateDir)
+				progress.Stage = "error"
+				progress.Message = err.Error()
+				publishUpdateProgress(cfg, assets, progress)
+				appendMaintenanceLog(cfg.StateDir, "update failed: "+err.Error())
+			}
+		}
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
@@ -238,10 +251,15 @@ func run(arguments []string) error {
 			return err
 		}
 		fmt.Println("Configuration saved.")
+		if runtime.GOOS == "windows" {
+			if err := enableUpdateProtocol(cfg.StateDir, ""); err != nil {
+				return err
+			}
+		}
 		return nil
 
 	case "update":
-		path, err := updater.Check(cfg.ChannelURL, version, cfg.StateDir)
+		path, err := checkUpdate(cfg, assets, version)
 		if err != nil {
 			return err
 		}
@@ -259,12 +277,13 @@ func run(arguments []string) error {
 		if err := ensureSpotifyPath(&cfg); err != nil {
 			return err
 		}
-		path, err := updater.Check(cfg.ChannelURL, version, cfg.StateDir)
+		path, err := checkUpdate(cfg, assets, version)
 		if err != nil {
 			return err
 		}
 		if path == "" {
-			return errors.New("no update is available to download")
+			fmt.Println("You are up to date.")
+			return nil
 		}
 		if err := manager(cfg, assets).SyncUpdateStatus(); err != nil {
 			return err
@@ -289,15 +308,22 @@ func run(arguments []string) error {
 			if pending.Path == "" {
 				return errors.New("the update has not finished downloading")
 			}
+			publishUpdateProgress(cfg, assets, updater.Progress{Stage: "starting", Version: pending.Version, Step: 1, Steps: 4, Message: "Starting the verified installer"})
 			return exec.Command(pending.Path, "update-now", "--skip-update").Start()
 		}
 		executable, executableErr := os.Executable()
 		if executableErr != nil {
 			return executableErr
 		}
-		if err := updater.Activate(cfg.StateDir, executable); err != nil {
-			return err
+		release, acquired, lockErr := acquireUpdate(cfg.StateDir)
+		if lockErr != nil {
+			return lockErr
 		}
+		if !acquired {
+			return errUpdateBusy
+		}
+		defer release()
+		publishUpdateProgress(cfg, assets, updater.Progress{Stage: "stopping", Version: version, Step: 1, Steps: 4, Message: "Closing Spotify"})
 		wasRunning, runningErr := spotifyRunning()
 		if runningErr != nil {
 			return runningErr
@@ -307,7 +333,15 @@ func run(arguments []string) error {
 				return err
 			}
 		}
+		publishUpdateProgress(cfg, assets, updater.Progress{Stage: "installing", Version: version, Step: 2, Steps: 4, Message: "Installing the new interface"})
 		if err := manager(cfg, assets).Apply(); err != nil {
+			return err
+		}
+		publishUpdateProgress(cfg, assets, updater.Progress{Stage: "installing", Version: version, Step: 3, Steps: 4, Message: "Updating launchers and repairing the update link"})
+		if err := installSelf(cfg); err != nil {
+			return err
+		}
+		if err := updater.Activate(cfg.StateDir, executable); err != nil {
 			return err
 		}
 		if err := updater.ClearPending(cfg.StateDir); err != nil {
@@ -317,7 +351,14 @@ func run(arguments []string) error {
 			fmt.Fprintln(os.Stderr, "warning: could not refresh the update status:", err)
 		}
 		if wasRunning {
-			return launchSpotify(cfg)
+			publishUpdateProgress(cfg, assets, updater.Progress{Stage: "restarting", Version: version, Step: 4, Steps: 4, Message: "Reopening Spotify"})
+			if err := launchSpotify(cfg); err != nil {
+				return err
+			}
+		}
+		publishUpdateProgress(cfg, assets, updater.Progress{Stage: "complete", Version: version, Step: 4, Steps: 4, Message: "Update installed successfully"})
+		if runtime.GOOS == "windows" {
+			_ = startMaintenance(cfg.StateDir)
 		}
 		return nil
 
@@ -331,7 +372,7 @@ func run(arguments []string) error {
 			return err
 		}
 		if cfg.AutoUpdate && !*skipUpdate {
-			updatedPath, updateErr := updater.Check(cfg.ChannelURL, version, cfg.StateDir)
+			updatedPath, updateErr := checkUpdate(cfg, assets, version)
 			if updateErr != nil {
 				fmt.Fprintln(os.Stderr, "warning: automatic update download failed:", updateErr)
 			} else if updatedPath != "" {
@@ -474,14 +515,7 @@ func startMaintenance(stateDir string) error {
 
 func enableUpdateProtocol(stateDir, launcher string) error {
 	protocolVBS := filepath.Join(stateDir, "protocol.vbs")
-	escapedLauncher := strings.ReplaceAll(launcher, `"`, `""`)
-	vbs := "Set shell = CreateObject(\"WScript.Shell\")\r\n" +
-		"action = \"update-now\"\r\n" +
-		"If WScript.Arguments.Count > 0 Then\r\n" +
-		"  If InStr(1, LCase(WScript.Arguments(0)), \"download-update\", 1) > 0 Then action = \"download-update\"\r\n" +
-		"  If InStr(1, LCase(WScript.Arguments(0)), \"deactivate\", 1) > 0 Then action = \"deactivate\"\r\n" +
-		"End If\r\n" +
-		"shell.Run Chr(34) & \"" + escapedLauncher + "\" & Chr(34) & \" \" & action, 0, False\r\n"
+	vbs := updateProtocolScript(stateDir)
 	if err := os.WriteFile(protocolVBS, []byte(vbs), 0o700); err != nil {
 		return err
 	}
@@ -697,7 +731,19 @@ func watchMaintenance(cfg appconfig.Config, assets fs.FS, skipUpdate, once bool)
 	if !acquired {
 		return nil
 	}
-	defer release()
+	// Hand the watcher to the newly installed executable after releasing its mutex.
+	restartWatcher := false
+	defer func() {
+		release()
+		if restartWatcher {
+			_ = startMaintenance(cfg.StateDir)
+		}
+	}()
+	if runtime.GOOS == "windows" {
+		if err := enableUpdateProtocol(cfg.StateDir, ""); err != nil {
+			appendMaintenanceLog(cfg.StateDir, "repair update link failed: "+err.Error())
+		}
+	}
 
 	disabledMarker := filepath.Join(cfg.StateDir, "maintenance.disabled")
 	if _, err := os.Stat(disabledMarker); err == nil {
@@ -713,7 +759,7 @@ func watchMaintenance(cfg appconfig.Config, assets fs.FS, skipUpdate, once bool)
 				installedVersion = current
 			}
 		}
-		updatedPath, updateErr := updater.Check(cfg.ChannelURL, installedVersion, cfg.StateDir)
+		updatedPath, updateErr := checkUpdate(cfg, assets, installedVersion)
 		if updateErr != nil {
 			appendMaintenanceLog(cfg.StateDir, "update download failed: "+updateErr.Error())
 			return
@@ -730,6 +776,11 @@ func watchMaintenance(cfg appconfig.Config, assets fs.FS, skipUpdate, once bool)
 		}
 	}
 	maintenancePass := func() {
+		releaseUpdate, acquiredUpdate, updateLockErr := acquireUpdate(cfg.StateDir)
+		if updateLockErr != nil || !acquiredUpdate {
+			return
+		}
+		defer releaseUpdate()
 		if _, err := os.Stat(disabledMarker); err == nil {
 			return
 		}
@@ -779,6 +830,13 @@ func watchMaintenance(cfg appconfig.Config, assets fs.FS, skipUpdate, once bool)
 	}
 	nextUpdate := time.Now().Add(time.Minute)
 	for {
+		if raw, readErr := os.ReadFile(filepath.Join(cfg.StateDir, "current.txt")); readErr == nil {
+			current := strings.TrimSpace(string(raw))
+			if current != "" && current != "development" && current != version {
+				restartWatcher = true
+				return nil
+			}
+		}
 		select {
 		case <-storeLaunchEvents:
 			if _, err := os.Stat(disabledMarker); err == nil {

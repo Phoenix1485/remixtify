@@ -54,9 +54,21 @@ export type RuntimeSettings = {
   showSpotlight: boolean;
 };
 
+export type UpdateProgress = {
+  stage: string;
+  version?: string;
+  bytes?: number;
+  totalBytes?: number;
+  step?: number;
+  steps?: number;
+  message?: string;
+  updatedAt: number;
+};
+
 export type UpdateNotice = {
   update?: UpdateChannel;
   ready: boolean;
+  progress?: UpdateProgress;
 };
 
 export type PackageLifecycle = {
@@ -84,6 +96,7 @@ declare global {
       autoUpdate: boolean;
       availableUpdate?: UpdateChannel;
       updateReady: boolean;
+      updateProgress?: UpdateProgress;
     };
     SpotifyRedesign?: RuntimeAPI;
   }

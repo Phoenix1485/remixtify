@@ -2588,13 +2588,8 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testi
 
 /* Rows, action bars and identity/detail panels use the same translucent material. */
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
-  [data-testid="action-bar"],
   [data-testid="track-list"] > [role="presentation"]:first-child,
-  [data-testid="tracklist-row"],
-  .main-trackList-trackListRow,
   [data-testid="artist-entity-view"] .contentSpacing,
-  [data-testid="playlist-page"] .contentSpacing,
-  [data-testid="album-page"] .contentSpacing,
   [data-testid="home-ad-card"]
 ) {
   border-color: var(--srd-milk-border-soft) !important;
@@ -3375,14 +3370,35 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-search
 
 @media (min-width: 1121px) {
   html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav .srd-nav-search-section {
-    position: absolute !important;
-    inset: 50% auto auto 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: min(560px, calc(100% - 400px)) !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
     margin: 0 !important;
+    justify-content: center !important;
     z-index: 1;
   }
+}
+
+/* Keep Spotify's responsive search section in normal flow so its ResizeObserver
+   measures the available navigation width instead of collapsing it to an icon. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav form[role="search"],
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav .srd-search-layer:has(> [data-testid="search-input"]) {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav [data-testid="search-input"] {
+  width: 100% !important;
+  color: var(--srd-text) !important;
+  caret-color: var(--srd-text) !important;
+  padding-inline: 48px !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav [data-testid="search-input"]::placeholder {
+  color: var(--srd-muted) !important;
+  opacity: 1 !important;
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-search-popover {
@@ -3821,6 +3837,7 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
   height: 100% !important;
   padding: 0 !important;
   background: transparent !important;
+  color: inherit !important;
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
@@ -3829,6 +3846,302 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
   width: 20px;
   height: 20px;
   margin: 0 !important;
+  color: var(--srd-text) !important;
+  fill: currentColor !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
+  .srd-player [data-testid="control-button-playpause"],
+  [data-testid="action-bar-row"] [data-testid="play-button"]
+) :is(span, svg, path) {
+  color: var(--srd-text) !important;
+  fill: currentColor !important;
+}
+
+/* Neutralize Spotify's opaque card hover and carousel edge scrims. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"]) {
+  transition: transform 180ms cubic-bezier(0.2, 0.7, 0.25, 1), border-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"]):is(:hover, :focus-within) {
+  background: var(--srd-glass-control-fill) !important;
+  border-color: color-mix(in srgb, var(--srd-secondary) 35%, rgb(255 255 255 / 26%)) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 22%), 0 8px 20px rgb(0 0 0 / 16%) !important;
+  transform: translateY(-2px) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] [data-testid="play-button"] {
+  background: transparent !important;
+  color: var(--srd-text) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transition: opacity 180ms ease, transform 180ms ease !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] [data-testid="play-button"] > span {
+  background: var(--srd-glass-control-fill) !important;
+  color: var(--srd-text) !important;
+  border: 1px solid var(--srd-readable-accent) !important;
+  backdrop-filter: blur(var(--srd-glass-blur)) !important;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] [data-testid="play-button"] :is(span, svg, path) {
+  color: var(--srd-text) !important;
+  fill: currentColor !important;
+}
+
+.srd-update-status {
+  display: grid;
+  gap: 12px;
+  margin: 16px 24px 24px;
+  padding: 16px;
+  border: 1px solid var(--srd-border);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.srd-update-status-label { color: var(--srd-text); overflow-wrap: anywhere; }
+.srd-update-status--error { border-color: #fb7185; }
+.srd-update-progress { width: 100%; height: 8px; border: 0; border-radius: 8px; overflow: hidden; accent-color: var(--srd-secondary); }
+.srd-update-progress::-webkit-progress-bar { background: rgb(255 255 255 / 12%); border-radius: 8px; }
+.srd-update-progress::-webkit-progress-value { background: linear-gradient(90deg, var(--srd-primary), var(--srd-secondary)); border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.srd-theme-active body [data-testid="component-shelf"] :is(.e-10451-card, [data-testid="play-button"]) {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] {
+  --carousel-start-chevron-gradient: transparent !important;
+  --carousel-end-chevron-gradient: transparent !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="component-shelf"] :is(
+  .e-10451-overflow-button, [class*="overflow-button"]
+) {
+  background: transparent !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-motion="off"] body
+  [data-testid="component-shelf"] :is(.e-10451-card, .main-card-card, [data-testid="card-container"]):is(:hover, :focus-within) {
+  transform: none !important;
+}
+
+/* Detail pages: a horizontal identity header and a full-width track collection.
+   Spotify nests the toolbar and tracks together; keep that native structure. */
+/* Spotify fades the sticky header background at the page top. Hide its duplicate
+   title and play target there too, so they cannot cover the identity card. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-view:has([data-testid="playlist-page"], [data-testid="album-page"]) > [data-testid="topbar"]:has(> [style*="opacity: 0;"]) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="topbar-content"] [data-testid="play-button"] > span {
+  background: var(--srd-glass-control-fill) !important;
+  border: 1px solid var(--srd-readable-accent) !important;
+  color: var(--srd-text) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: var(--srd-space-3) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child {
+  position: relative !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: var(--srd-space-3) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--srd-glass-border) !important;
+  border-radius: var(--srd-radius-panel) !important;
+  background: var(--srd-glass-fill) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 12%), 0 8px 24px rgb(0 0 0 / 12%) !important;
+  backdrop-filter: blur(var(--srd-glass-blur)) saturate(1.3) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child > .contentSpacing {
+  position: relative;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--srd-space-3) !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child > .contentSpacing > :empty { display: none !important; }
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child > .contentSpacing > :has([data-testid="playlist-image"], button[aria-label="View album artwork"]) {
+  flex: 0 0 clamp(128px, 16vw, 208px) !important;
+  width: clamp(128px, 16vw, 208px) !important;
+  min-width: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child :is([data-testid="playlist-image"], button[aria-label="View album artwork"]) {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border-radius: var(--srd-radius-card) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child :is([data-testid="playlist-image"], button[aria-label="View album artwork"]) img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child .contentSpacing > :last-child {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="album-page"] > :first-child > .contentSpacing > button[aria-label="View album artwork"] {
+  flex: 0 0 clamp(128px, 16vw, 208px) !important;
+  width: clamp(128px, 16vw, 208px) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="playlist-page"] > :first-child .contentSpacing > :last-child > div:has(> span > div) > span > div {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal !important;
+  overflow: hidden !important;
+  color: var(--srd-muted) !important;
+  line-height: 1.5 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child h1 {
+  font-size: clamp(28px, 3.2vw, 48px) !important;
+  line-height: 1.12 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  margin-block: 8px 12px !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > div:has([data-testid="action-bar"]) {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-top: var(--srd-space-2) !important;
+  padding: 0 !important;
+}
+
+/* Native row heights stay intact so virtualized tracks cannot overlap. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) .contentSpacing {
+  min-width: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Keep a restrained cover tint without the native rectangular colour block. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child > :not(.contentSpacing) {
+  opacity: 0.2;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) [data-testid="tracklist-row"] {
+  width: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--srd-radius-button) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) [data-testid="tracklist-row"]:is(:hover, :focus-within, [aria-selected="true"]) {
+  background: rgb(255 255 255 / 9%) !important;
+  border-color: var(--srd-glass-border) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) [data-testid="action-bar"] {
+  min-height: 0 !important;
+  padding: var(--srd-space-2) !important;
+  margin-bottom: var(--srd-space-2) !important;
+  border-radius: var(--srd-radius-panel) !important;
+  border: 1px solid var(--srd-glass-border) !important;
+  background: var(--srd-glass-fill) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 12%) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] button:not([role="combobox"]) {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  color: var(--srd-text) !important;
+  border: 1px solid var(--srd-glass-border) !important;
+  background: var(--srd-glass-control-fill) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 12%) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] button[data-testid="play-button"] {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  border-color: var(--srd-readable-accent) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] button > span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] button svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] [data-testid="watch-feed-entity-button"] {
+  border-radius: var(--srd-radius-button) !important;
+  overflow: hidden !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] [data-testid="watch-feed-entity-button"] img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Restore the native save/download SVGs instead of font-dependent pseudo-icons. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] :is([data-testid="add-button"], button[aria-label^="Download" i])::before { content: none !important; }
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="action-bar-row"] :is([data-testid="add-button"], button[aria-label^="Download" i]) svg { display: block !important; }
+
+@media (max-width: 700px) {
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) { padding: var(--srd-space-2) !important; }
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is([data-testid="playlist-page"], [data-testid="album-page"]) > :first-child > .contentSpacing { flex-direction: column !important; align-items: flex-start !important; }
 }
 
 /* Keep the accent states after applying the shared glass button material. */
@@ -5309,7 +5622,26 @@ ${layout_fixes_default}`;
     renderSettings();
     return backdrop;
   }
-  function createUpdateConfirmation(update) {
+  function openUpdaterAction(action) {
+    const link = document.createElement("a");
+    link.href = `remixify://${action}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+  function updateProgressText(notice) {
+    const progress = notice.progress;
+    if (!progress) return notice.ready ? "Downloaded and verified \u2014 ready to install" : "Waiting for the updater\u2026";
+    if (progress.stage === "downloading") {
+      const bytes = progress.bytes || 0;
+      const total = progress.totalBytes || 0;
+      const size = `${(bytes / 1048576).toFixed(1)} MB`;
+      return total > 0 ? `Downloading ${Math.min(100, Math.floor(bytes / total * 100))}% \xB7 ${size} / ${(total / 1048576).toFixed(1)} MB` : `Downloading \xB7 ${size}`;
+    }
+    const step = progress.steps ? `Step ${progress.step} of ${progress.steps}: ` : "";
+    return step + (progress.message || progress.stage);
+  }
+  function createUpdateConfirmation(update, initial = { update, ready: true }) {
     const backdrop = element("div", "srd-backdrop");
     const modal = element("section", "srd-modal");
     const header = element("header", "srd-modal-header");
@@ -5321,31 +5653,79 @@ ${layout_fixes_default}`;
     const copy = element(
       "p",
       "srd-confirm-copy",
-      `Version ${update.version} is ready. Spotify needs to close and reopen to finish installing it. Do you want to update now?`
+      initial.ready ? `Version ${update.version} is ready. Spotify will close and reopen to install it.` : `Version ${update.version} is downloading in the background. You can install it once verification finishes.`
     );
     const actions = element("div", "srd-confirm-actions");
+    const statusView = element("div", "srd-update-status");
+    statusView.setAttribute("role", "status");
+    statusView.setAttribute("aria-live", "polite");
+    const statusLabel = element("div", "srd-update-status-label");
+    const bar = element("progress", "srd-update-progress");
+    bar.max = 100;
+    bar.ariaLabel = "Update progress";
+    statusView.append(statusLabel, bar);
     const cancel = element("button", "srd-button", "Not now");
     const install = element("button", "srd-button srd-button--primary", "Update now");
     cancel.type = install.type = "button";
     actions.append(cancel, install);
-    modal.append(header, copy, actions);
+    modal.append(header, copy, statusView, actions);
     backdrop.appendChild(modal);
-    const dismiss = () => backdrop.remove();
+    let notice = initial;
+    let requestedAt = 0;
+    let busy = false;
+    let acknowledgement;
+    const renderProgress = () => {
+      statusLabel.textContent = updateProgressText(notice);
+      const progress = notice.progress;
+      if (progress?.stage === "downloading" && (progress.totalBytes || 0) > 0) bar.value = Math.min(100, (progress.bytes || 0) / progress.totalBytes * 100);
+      else if (progress?.stage === "complete") bar.value = 100;
+      else if (progress?.steps) bar.value = Math.max(0, ((progress.step || 1) - 1) / progress.steps * 100);
+      else if (notice.ready && !busy) bar.value = 100;
+      else bar.removeAttribute("value");
+      statusView.classList.toggle("srd-update-status--error", progress?.stage === "error");
+      title.textContent = busy ? "Installing update" : notice.ready ? "Install update?" : "Downloading update";
+      install.disabled = busy || !notice.ready && progress?.stage !== "error";
+      install.textContent = busy ? "Installing\u2026" : notice.ready ? "Update now" : progress?.stage === "error" ? "Retry download" : "Downloading\u2026";
+      cancel.textContent = busy ? "Hide" : "Not now";
+    };
+    const onProgress = (event) => {
+      const next = event.detail;
+      if (next.update?.version !== update.version) return;
+      const progress = next.progress;
+      if (requestedAt && (!progress || progress.updatedAt < requestedAt)) return;
+      if (requestedAt && progress && progress.updatedAt >= requestedAt && ["checking", "downloading", "verifying", "ready", "starting", "stopping", "installing", "restarting", "complete", "error"].includes(progress.stage)) {
+        window.clearTimeout(acknowledgement);
+        if (progress.stage === "error") busy = false;
+      }
+      notice = next;
+      if (progress && ["checking", "downloading", "verifying", "ready", "complete", "error"].includes(progress.stage)) busy = false;
+      renderProgress();
+    };
+    window.addEventListener("spotify-redesign:update-available", onProgress);
+    const dismiss = () => {
+      window.clearTimeout(acknowledgement);
+      window.removeEventListener("spotify-redesign:update-available", onProgress);
+      backdrop.remove();
+    };
     close.addEventListener("click", dismiss);
     cancel.addEventListener("click", dismiss);
     backdrop.addEventListener("mousedown", (event) => {
       if (event.target === backdrop) dismiss();
     });
     install.addEventListener("click", () => {
-      install.disabled = true;
-      install.textContent = "Starting update\u2026";
-      const action = document.createElement("a");
-      action.href = "remixify://update-now";
-      action.hidden = true;
-      document.body.appendChild(action);
-      action.click();
-      action.remove();
+      requestedAt = Date.now();
+      const downloading = !notice.ready;
+      busy = true;
+      notice = { ...notice, progress: { stage: "starting", message: "Waiting for Windows to start the updater\u2026", updatedAt: requestedAt } };
+      renderProgress();
+      openUpdaterAction(downloading ? "download-update" : "update-now");
+      acknowledgement = window.setTimeout(() => {
+        busy = false;
+        notice = { ...notice, progress: { stage: "error", message: "Windows did not respond to the update link. Retry the update; if it still fails, restart Remixify to repair the link. Your downloaded update is still saved.", updatedAt: Date.now() } };
+        renderProgress();
+      }, 9e3);
     });
+    renderProgress();
     return backdrop;
   }
   function createDeactivateConfirmation() {
@@ -5410,29 +5790,27 @@ ${layout_fixes_default}`;
       host.querySelector(".srd-update-button")?.remove();
       const update = notice.update;
       if (!update) return;
-      const label = notice.ready ? "Update" : autoDownload ? "Downloading\u2026" : "Download available";
+      const progress = notice.progress;
+      const percent = progress?.stage === "downloading" && (progress.totalBytes || 0) > 0 ? ` ${Math.min(100, Math.floor((progress.bytes || 0) / progress.totalBytes * 100))}%` : "";
+      const failed = progress?.stage === "error";
+      const label = notice.ready ? "Update" : failed ? "Update failed" : autoDownload ? `Downloading${percent}\u2026` : "Download available";
       const updateButton = element("button", "srd-update-button", label);
       updateButton.type = "button";
       updateButton.title = notice.ready ? `Install Remixify ${update.version}` : `Download Remixify ${update.version}`;
-      updateButton.disabled = !notice.ready && autoDownload;
+      updateButton.title = updateProgressText(notice);
       updateButton.addEventListener("click", () => {
         if (!notice.ready) {
-          updateButton.disabled = true;
-          updateButton.textContent = "Downloading\u2026";
-          const action = document.createElement("a");
-          action.href = "remixify://download-update";
-          action.hidden = true;
-          document.body.appendChild(action);
-          action.click();
-          action.remove();
+          document.querySelector(".srd-backdrop")?.remove();
+          document.body.appendChild(createUpdateConfirmation(update, notice));
+          if (!autoDownload || failed) openUpdaterAction("download-update");
           return;
         }
         document.querySelector(".srd-backdrop")?.remove();
-        document.body.appendChild(createUpdateConfirmation(update));
+        document.body.appendChild(createUpdateConfirmation(update, notice));
       });
       host.appendChild(updateButton);
     };
-    showAvailableUpdate({ update: availableUpdate, ready: updateReady });
+    showAvailableUpdate({ update: availableUpdate, ready: updateReady, progress: window.__SpotifyRedesignBootstrap?.updateProgress });
     window.addEventListener("spotify-redesign:update-available", (event) => {
       showAvailableUpdate(event.detail);
     });
