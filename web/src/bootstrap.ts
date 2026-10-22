@@ -18,6 +18,7 @@ function readSettings(autoUpdate: boolean): RuntimeSettings {
       motion: true,
       glassClarity: 78,
       glassBlur: 24,
+      glassBrightness: 65,
       showSpotlight: true,
       ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"),
       autoUpdate,
@@ -39,6 +40,7 @@ function readSettings(autoUpdate: boolean): RuntimeSettings {
       glassClarity: 78,
       glassBlur: 24,
       showSpotlight: true,
+      glassBrightness: 65,
     };
   }
 }

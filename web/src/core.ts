@@ -146,6 +146,7 @@ function readSettings(): RuntimeSettings {
     motion: stored.motion ?? true,
     glassClarity: numberBetween(stored.glassClarity, 0, 100, 78),
     glassBlur: numberBetween(stored.glassBlur, 0, 48, 24),
+    glassBrightness: numberBetween(stored.glassBrightness, 0, 100, 65),
     showSpotlight: stored.showSpotlight ?? true,
   };
 }
@@ -313,6 +314,7 @@ function applyThemeState(settings: RuntimeSettings): void {
     validColor(settings.secondaryColor, DEFAULT_SECONDARY_COLOR),
   );
   root.style.setProperty("--srd-glass-blur", `${blur}px`);
+  root.style.setProperty("--srd-glass-tint-alpha", (numberBetween(settings.glassBrightness, 0, 100, 65) * 0.002).toFixed(3));
   root.style.setProperty("--srd-glass-nav-alpha", alpha(0.54, 0.0037, 0.17));
   root.style.setProperty("--srd-glass-shell-alpha", alpha(0.5, 0.0034, 0.16));
   root.style.setProperty("--srd-glass-shelf-alpha", alpha(0.49, 0.00335, 0.15));
@@ -366,6 +368,7 @@ function syncPlayerArtwork(playerZone: HTMLElement, player: HTMLElement): void {
 
 function labelWindowControls(): void {
   const parents = new Set<HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-testid="window-controls"]').forEach((node) => parents.add(node));
   for (const node of document.querySelectorAll<HTMLElement>('button, [role="button"]')) {
     if (node.closest(".srd-modal, .srd-backdrop")) continue;
     const signature = [
@@ -378,19 +381,61 @@ function labelWindowControls(): void {
       .join(" ")
       .toLowerCase();
     let action = "";
-    if (/minimi[sz]e|window[-_ ]min/.test(signature)) action = "minimize";
-    else if (/maximi[sz]e|restore down|window[-_ ]max/.test(signature)) action = "maximize";
-    else if (/^(close|close window)$|window[-_ ]close|caption[-_ ]close|titlebar[-_ ]close/.test(signature)) action = "close";
+    if (/minimi[sz]e|minimieren|window[-_ ]min/.test(signature)) action = "minimize";
+    else if (/maximi[sz]e|maximieren|restore down|window[-_ ]max/.test(signature)) action = "maximize";
+    else if (/window[-_ ]close|caption[-_ ]close|titlebar[-_ ]close|schlie(?:ß|ss)en/.test(signature) ||
+      [node.getAttribute("aria-label"), node.getAttribute("title")].some((label) => /^(close|close window)$/i.test(label || ""))) action = "close";
     if (!action) continue;
     const rect = node.getBoundingClientRect();
-    if (rect.top > 80 || rect.right < window.innerWidth - 400) continue;
+    if (!node.closest('[data-testid="window-controls"]') && (rect.top > 80 || rect.right < window.innerWidth - 400)) continue;
     node.classList.add("srd-window-control");
     node.dataset.srdWindowAction = action;
     if (node.parentElement) parents.add(node.parentElement);
   }
   for (const parent of parents) {
-    if (parent.querySelectorAll(":scope > .srd-window-control").length >= 2) {
+    if (parent.querySelectorAll(":scope > .srd-window-control").length >= 2 || parent.matches('[data-testid="window-controls"]')) {
       parent.classList.add("srd-window-controls");
+      let ancestor = parent.parentElement;
+      while (ancestor && !ancestor.matches('[data-testid="global-nav-bar"], .Root')) {
+        ancestor.classList.add("srd-caption-owner");
+        ancestor = ancestor.parentElement;
+      }
+    }
+  }
+  // Spotify on Windows also draws caption buttons outside the web DOM. Give those
+  // native hit targets a separate decorative glass frame instead of duplicating them.
+  const domControls = document.querySelector(".srd-window-controls");
+  const nativeControls = !domControls && /Windows/.test(navigator.userAgent) && Boolean(window.__SpotifyRedesignConfig) &&
+    !document.fullscreenElement && !document.documentElement.classList.contains("fullscreen");
+  document.documentElement.dataset.srdCaption = domControls ? "dom" : nativeControls ? "native" : "none";
+  for (const [id, className, visible] of [
+    ["srd-native-caption-frame", "srd-native-caption-frame", nativeControls],
+    ["srd-native-menu-frame", "srd-native-menu-frame", nativeControls],
+  ] as const) {
+    let frame = document.getElementById(id);
+    if (visible && !frame) {
+      frame = element("div", className);
+      frame.id = id;
+      frame.ariaHidden = "true";
+      document.body.appendChild(frame);
+    } else if (!visible) frame?.remove();
+  }
+}
+
+function labelSearchLayers(): void {
+  const nav = document.querySelector<HTMLElement>('[data-testid="global-nav-bar"]');
+  if (!nav) return;
+  for (const input of nav.querySelectorAll<HTMLElement>('input, [role="combobox"]')) {
+    let ancestor = input.parentElement;
+    while (ancestor && ancestor !== nav) {
+      ancestor.classList.add("srd-search-layer");
+      if (ancestor.parentElement === nav && nav.children.length >= 3 && !ancestor.querySelector(".srd-window-controls")) {
+        ancestor.classList.add("srd-nav-search-section");
+      }
+      ancestor = ancestor.parentElement;
+    }
+    for (const id of (input.getAttribute("aria-controls") || "").split(/\s+/).filter(Boolean)) {
+      document.getElementById(id)?.classList.add("srd-search-popover");
     }
   }
 }
@@ -425,6 +470,7 @@ function labelSpotifyShell(): boolean {
   player?.classList.add("srd-player");
   if (playerZone && player) syncPlayerArtwork(playerZone, player);
   labelWindowControls();
+  labelSearchLayers();
   return true;
 }
 
@@ -481,6 +527,8 @@ function mountStructureObserver(): void {
   labelSpotifyStructure();
   observeSidebarWidth();
   new MutationObserver(() => schedule()).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("focusin", labelSearchLayers);
+  document.addEventListener("fullscreenchange", labelWindowControls);
   document.addEventListener(
     "click",
     (event) => {
@@ -915,6 +963,18 @@ function createSettingsModal(manager: PackageManager, channel: UpdateChannel, us
     blurControl.querySelector("input")?.setAttribute("aria-label", "Glass blur");
     blurRow.append(blurCopy, blurControl);
 
+    const brightnessRow = element("div", "srd-row");
+    const brightnessCopy = element("div");
+    brightnessCopy.append(
+      element("h3", "", "Glass brightness"),
+      element("p", "", "Adjust the light tint of panels, cards and controls without changing your theme colors."),
+    );
+    const brightnessControl = makeRangeControl(settings.glassBrightness, 0, 100, "%", (glassBrightness) =>
+      updateAppearance({ glassBrightness }),
+    );
+    brightnessControl.querySelector("input")?.setAttribute("aria-label", "Glass brightness");
+    brightnessRow.append(brightnessCopy, brightnessControl);
+
     const spotlightRow = element("div", "srd-row");
     const spotlightCopy = element("div");
     spotlightCopy.append(
@@ -1073,6 +1133,7 @@ function createSettingsModal(manager: PackageManager, channel: UpdateChannel, us
       layoutRow,
       clarityRow,
       blurRow,
+      brightnessRow,
       spotlightRow,
       densityRow,
       motionRow,

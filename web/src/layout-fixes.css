@@ -12,12 +12,20 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] {
   --srd-muted: #b8c2d1;
   --srd-text: #f4f7fc;
   --srd-surface: #101923;
-  --srd-glass-surface: rgb(10 18 28 / 86%);
-  --srd-glass-fill: linear-gradient(145deg, rgb(255 255 255 / 7%), transparent 60%), var(--srd-glass-surface);
+  /* Clarity controls opacity; brightness controls the pale tint; blur stays independent. */
+  --srd-glass-surface: rgb(26 36 54 / var(--srd-material-alpha, var(--srd-glass-shell-alpha, 0.235)));
+  --srd-glass-fill: linear-gradient(145deg, rgb(230 241 255 / var(--srd-glass-tint-alpha, 0.13)), rgb(230 241 255 / 3%) 65%), var(--srd-glass-surface);
+  --srd-glass-control-fill: linear-gradient(145deg, rgb(240 247 255 / var(--srd-glass-tint-alpha, 0.13)), rgb(240 247 255 / 4%)), rgb(30 40 58 / var(--srd-glass-control-alpha, 0.083));
+  --srd-caption-width: 138px;
   --srd-readable-accent: color-mix(in srgb, var(--srd-secondary) 55%, white);
   --text-base: var(--srd-text) !important;
   --text-subdued: var(--srd-muted) !important;
   --essential-subdued: var(--srd-muted) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-density="compact"] {
+  --srd-space-2: 12px;
+  --srd-space-3: 20px;
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
@@ -44,15 +52,39 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-gr
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav {
+  --srd-material-alpha: var(--srd-glass-nav-alpha);
+  position: relative !important;
+  z-index: 400 !important;
+  isolation: isolate;
+  overflow: visible !important;
+  contain: none !important;
+  align-items: center !important;
   padding-inline-end: var(--srd-space-1) !important;
 }
 
+/* Caption controls sit in their own panel with a 16 px gap from navigation. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme]:is([data-srd-caption="dom"], [data-srd-caption="native"]) body .srd-global-nav {
+  margin-inline-end: calc(var(--srd-caption-width) + var(--srd-space-2)) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-caption="native"] body .srd-app-grid {
+  padding-top: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-caption="native"] body .srd-global-nav {
+  margin-inline-start: 48px !important;
+}
+
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-window-controls {
-  position: relative !important;
-  inset: auto !important;
+  position: absolute !important;
+  inset: -1px calc(-1 * (var(--srd-caption-width) + var(--srd-space-2)) - 1px) auto auto !important;
   flex: 0 0 auto !important;
   align-self: center;
-  margin: 0 var(--srd-space-1) 0 var(--srd-space-2) !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  width: var(--srd-caption-width) !important;
+  height: 64px !important;
+  margin: 0 !important;
   border-radius: var(--srd-radius-card) !important;
   background: var(--srd-glass-fill) !important;
   -webkit-backdrop-filter: blur(var(--srd-glass-blur, 24px)) !important;
@@ -60,11 +92,79 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-window
   -webkit-app-region: no-drag;
 }
 
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-caption-owner {
+  position: static !important;
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Native Windows hit targets and menus keep their OS handlers. These frames are decorative. */
+.srd-native-caption-frame, .srd-native-menu-frame { display: none; }
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-caption="native"] body :is(.srd-native-caption-frame, .srd-native-menu-frame) {
+  position: fixed;
+  z-index: 1000;
+  display: block;
+  top: 0;
+  right: 0;
+  width: var(--srd-caption-width);
+  height: 64px;
+  box-sizing: border-box;
+  border: 1px solid var(--srd-milk-border);
+  border-radius: var(--srd-radius-panel);
+  background: var(--srd-glass-fill);
+  -webkit-backdrop-filter: blur(var(--srd-glass-blur)) brightness(1.5);
+  backdrop-filter: blur(var(--srd-glass-blur)) brightness(1.5);
+  box-shadow: inset 0 1px rgb(255 255 255 / 18%), 0 8px 24px rgb(0 0 0 / 12%);
+  pointer-events: none;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme][data-srd-caption="native"] body .srd-native-menu-frame {
+  left: 0;
+  right: auto;
+  width: 48px;
+}
+
+/* Search creates a stacking context ABOVE the feed; no ancestor clips the dropdown. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-search-layer {
+  overflow: visible !important;
+  contain: none !important;
+}
+
+@media (min-width: 1121px) {
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-global-nav .srd-nav-search-section {
+    position: absolute !important;
+    inset: 50% auto auto 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(560px, calc(100% - 400px)) !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    z-index: 1;
+  }
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-search-popover {
+  z-index: 1000 !important;
+  border: 1px solid var(--srd-milk-border) !important;
+  border-radius: var(--srd-radius-panel) !important;
+  background: linear-gradient(145deg, rgb(230 241 255 / var(--srd-glass-tint-alpha)), transparent), rgb(26 36 54 / var(--srd-glass-modal-alpha, 0.424)) !important;
+  backdrop-filter: blur(var(--srd-glass-blur)) saturate(1.3) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(.srd-main-view, .srd-left-sidebar, .srd-player-zone) {
+  position: relative !important;
+  z-index: 0;
+}
+
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
   .srd-window-control, .srd-settings-button, .srd-update-button
 ) {
   border-radius: var(--srd-radius-button) !important;
   color: var(--srd-text) !important;
+  background: var(--srd-glass-control-fill) !important;
+  -webkit-backdrop-filter: blur(var(--srd-glass-blur)) !important;
+  backdrop-filter: blur(var(--srd-glass-blur)) !important;
 }
 
 /* 2. Nur die Hintergrund-Layer aus Spotifys Home-CSS ersetzen, nie Inhalte maskieren.
@@ -78,7 +178,7 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-v
   .Q7ciR0kAsukiCprc, /* dwp-home-header.css: dekorativer Home-Hintergrund */
   .kRkvH3JcI5sYgH6J  /* dwp-home-chips-row.css: Hintergrund der klebenden Filter */
 ) {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--srd-primary) 24%, var(--srd-surface)), transparent) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--srd-primary) 14%, transparent), transparent) !important;
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-main-view .kRkvH3JcI5sYgH6J {
@@ -97,11 +197,20 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testi
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] [data-testid="component-shelf"] {
   margin: 0 !important;
-  padding: var(--srd-space-2) !important;
+  padding: var(--srd-space-3) !important;
   height: auto !important;
   max-height: none !important;
   --shelf-fixed-max-height: none;
   --extracted-text-subdued: var(--srd-muted);
+  --srd-material-alpha: var(--srd-glass-shelf-alpha);
+}
+
+/* Neutralize Spotify's negative carousel bleed so first/last cards retain their gutter. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] :is(
+  [data-testid="component-shelf"], [data-testid="component-shelf"] [data-shelf="carousel"]
+) {
+  --shelf-carousel-margin-start-mul: 0 !important;
+  --shelf-carousel-margin-end-mul: 0 !important;
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"] [data-testid="rich-title-row-shelf-header"] {
@@ -132,6 +241,13 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testi
   column-gap: var(--srd-space-2) !important;
   row-gap: var(--srd-space-2) !important;
   padding-inline: 0 !important;
+  margin-inline: 0 !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
+  [data-testid="component-shelf"] [role="row"] {
+  margin-inline: 0 !important;
+  column-gap: var(--srd-space-2) !important;
 }
 
 /* 4 + 5. Keine festen 276 px: Bild und zwei Textzeilen dürfen die Höhe bestimmen. */
@@ -159,6 +275,7 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testi
   overflow: visible !important;
   border-radius: var(--srd-radius-card) !important;
   scroll-snap-align: start;
+  background: var(--srd-glass-control-fill) !important;
 }
 
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body [data-testid="home-page"]
@@ -324,6 +441,7 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-left-s
 
 /* 7. Cover und Controls fließen in einer Karte. Kein absoluter Footer mit Leerraum. */
 html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player-zone {
+  --srd-material-alpha: var(--srd-glass-player-alpha);
   display: flex !important;
   flex-direction: column !important;
   align-self: start;
@@ -402,6 +520,83 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
   gap: var(--srd-space-1) !important;
   opacity: 1 !important;
   color: var(--srd-muted) !important;
+}
+
+/* Spotify's current transport is general-controls, with balanced left/right groups. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="player-controls"] [data-testid="general-controls"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 46px minmax(0, 1fr) !important;
+  align-items: center !important;
+  width: 100% !important;
+  gap: var(--srd-space-1) !important;
+  margin: 0 0 var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="player-controls"] [data-testid="general-controls"] > :is(:first-child, :last-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+  gap: var(--srd-space-1) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="player-controls"] [data-testid="general-controls"] > :last-child {
+  justify-content: flex-start !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="player-controls"] [data-testid="general-controls"] button {
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--srd-text) !important;
+  background: var(--srd-glass-control-fill) !important;
+  backdrop-filter: blur(var(--srd-glass-blur)) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="player-controls"] [data-testid="control-button-playpause"] {
+  width: 46px !important;
+  min-width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  border-radius: 50% !important;
+  justify-self: center !important;
+  color: var(--srd-text) !important;
+  background: var(--srd-glass-control-fill) !important;
+  border: 1px solid var(--srd-readable-accent) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 25%), 0 5px 20px color-mix(in srgb, var(--srd-primary) 24%, transparent) !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="control-button-playpause"] > span {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="control-button-playpause"] svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 0 !important;
+}
+
+/* Keep the accent states after applying the shared glass button material. */
+html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+  [data-testid="player-controls"] [data-testid="general-controls"] :is(
+    [data-testid="control-button-shuffle"], [data-testid="control-button-repeat"]
+  ):is([aria-checked="true"], [aria-checked="mixed"], [aria-pressed="true"]) {
+  color: var(--srd-readable-accent) !important;
+  border-color: currentColor !important;
 }
 
 /* Helle inaktive Symbole statt multiplizierter Opacity; Aktivzustand bleibt eindeutig. */
@@ -497,6 +692,35 @@ html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body :is(
 }
 
 /* Kleine Fenster: Home-Shelves einspaltig, Player im normalen Fluss unter dem Inhalt. */
+@container (max-width: 340px) {
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+    [data-testid="player-controls"] [data-testid="general-controls"] {
+    grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+    [data-testid="player-controls"] [data-testid="general-controls"] > :is(:first-child, :last-child) {
+    gap: 6px !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+    [data-testid="player-controls"] [data-testid="general-controls"] button {
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+  }
+
+  html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-player
+    [data-testid="player-controls"] [data-testid="general-controls"] [data-testid="control-button-playpause"] {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+}
+
 @media (max-width: 1120px) {
   html.srd-theme-active[data-srd-layout="studio"][data-srd-theme] body .srd-app-grid {
     grid-template-areas: "global-nav global-nav" "left-sidebar main-view" "now-playing-bar now-playing-bar" !important;

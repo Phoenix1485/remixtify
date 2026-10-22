@@ -50,6 +50,7 @@ export type RuntimeSettings = {
   motion: boolean;
   glassClarity: number;
   glassBlur: number;
+  glassBrightness: number;
   showSpotlight: boolean;
 };
 
