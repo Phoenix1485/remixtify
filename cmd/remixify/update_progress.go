@@ -57,7 +57,7 @@ func updateProtocolScript(stateDir string) string {
 		"uri = LCase(WScript.Arguments(0))\r\nIf Right(uri, 1) = \"/\" Then uri = Left(uri, Len(uri)-1)\r\n" +
 		"Select Case uri\r\n" + cases.String() + "Case Else: WScript.Quit 1\r\nEnd Select\r\n" +
 		"Set shell = CreateObject(\"WScript.Shell\")\r\nSet files = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
-		"current = Trim(files.OpenTextFile(\"" + state + "\\current.txt\").ReadAll)\r\n" +
+		"current = Trim(files.OpenTextFile(\"" + state + "\\current.txt\").ReadLine)\r\n" +
 		"exe = \"" + state + "\\versions\\\" & current & \"\\remixify.exe\"\r\n" +
 		"If Not files.FileExists(exe) Then exe = \"" + state + "\\versions\\\" & current & \"\\spotify-redesign.exe\"\r\n" +
 		"shell.Run Chr(34) & exe & Chr(34) & \" \" & action, 0, False\r\n"
